@@ -2,14 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* Matriz Integral - Sistema de diseño para niños
+Colores vibrantes y amigables siguiendo la metodología de Ken Wilber
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 40 100% 97%;
     --foreground: 222.2 84% 4.9%;
+    
+    /* Módulos principales de la Matriz Integral */
+    --cuerpo: 210 100% 56%;
+    --cuerpo-light: 210 100% 92%;
+    --cuerpo-foreground: 0 0% 100%;
+    
+    --mente: 142 71% 45%;
+    --mente-light: 142 71% 90%;
+    --mente-foreground: 0 0% 100%;
+    
+    --espiritu: 262 83% 58%;
+    --espiritu-light: 262 83% 92%;
+    --espiritu-foreground: 0 0% 100%;
+    
+    --sombra: 215 13% 50%;
+    --sombra-light: 215 13% 90%;
+    --sombra-foreground: 0 0% 100%;
+    
+    /* Módulos auxiliares */
+    --etica: 25 95% 53%;
+    --etica-light: 25 95% 90%;
+    --etica-foreground: 0 0% 100%;
+    
+    --sexualidad: 330 81% 60%;
+    --sexualidad-light: 330 81% 90%;
+    --sexualidad-foreground: 0 0% 100%;
+    
+    --trabajo: 45 93% 47%;
+    --trabajo-light: 45 93% 90%;
+    --trabajo-foreground: 0 0% 100%;
+    
+    --emociones: 291 64% 42%;
+    --emociones-light: 291 64% 90%;
+    --emociones-foreground: 0 0% 100%;
+    
+    --relaciones: 173 80% 40%;
+    --relaciones-light: 173 80% 90%;
+    --relaciones-foreground: 0 0% 100%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;

@@ -47,6 +47,52 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Módulos de la Matriz Integral
+        cuerpo: {
+          DEFAULT: "hsl(var(--cuerpo))",
+          light: "hsl(var(--cuerpo-light))",
+          foreground: "hsl(var(--cuerpo-foreground))",
+        },
+        mente: {
+          DEFAULT: "hsl(var(--mente))",
+          light: "hsl(var(--mente-light))",
+          foreground: "hsl(var(--mente-foreground))",
+        },
+        espiritu: {
+          DEFAULT: "hsl(var(--espiritu))",
+          light: "hsl(var(--espiritu-light))",
+          foreground: "hsl(var(--espiritu-foreground))",
+        },
+        sombra: {
+          DEFAULT: "hsl(var(--sombra))",
+          light: "hsl(var(--sombra-light))",
+          foreground: "hsl(var(--sombra-foreground))",
+        },
+        etica: {
+          DEFAULT: "hsl(var(--etica))",
+          light: "hsl(var(--etica-light))",
+          foreground: "hsl(var(--etica-foreground))",
+        },
+        sexualidad: {
+          DEFAULT: "hsl(var(--sexualidad))",
+          light: "hsl(var(--sexualidad-light))",
+          foreground: "hsl(var(--sexualidad-foreground))",
+        },
+        trabajo: {
+          DEFAULT: "hsl(var(--trabajo))",
+          light: "hsl(var(--trabajo-light))",
+          foreground: "hsl(var(--trabajo-foreground))",
+        },
+        emociones: {
+          DEFAULT: "hsl(var(--emociones))",
+          light: "hsl(var(--emociones-light))",
+          foreground: "hsl(var(--emociones-foreground))",
+        },
+        relaciones: {
+          DEFAULT: "hsl(var(--relaciones))",
+          light: "hsl(var(--relaciones-light))",
+          foreground: "hsl(var(--relaciones-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
