@@ -24,7 +24,15 @@ export const useMatrizData = () => {
     }
 
     if (storedHorarios) {
-      setHorarios(JSON.parse(storedHorarios));
+      const parsedHorarios = JSON.parse(storedHorarios);
+      // Migrar datos antiguos al nuevo formato
+      const migratedHorarios = parsedHorarios.map((h: any) => {
+        if (h.practicaId && !h.practicaIds) {
+          return { ...h, practicaIds: [h.practicaId] };
+        }
+        return h;
+      });
+      setHorarios(migratedHorarios);
     }
   }, []);
 

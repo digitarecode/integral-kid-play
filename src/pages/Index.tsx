@@ -369,7 +369,9 @@ const Index = () => {
                 <div className="text-3xl mb-2">⚡</div>
                 <div className="text-2xl font-bold">
                   {Math.round(horarios.reduce((acc, h) => {
-                    return acc + h.practicaIds.reduce((subAcc, practicaId) => {
+                    // Compatibilidad hacia atrás: manejar tanto estructura nueva como antigua
+                    const practicaIds = h.practicaIds || (h as any).practicaId ? [(h as any).practicaId] : [];
+                    return acc + practicaIds.reduce((subAcc, practicaId) => {
                       const practica = practicas.find(p => p.id === practicaId);
                       return subAcc + (practica?.duracion || 0);
                     }, 0);
