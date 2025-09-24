@@ -64,7 +64,10 @@ export const useMatrizData = () => {
     const practica = practicas.find(p => p.id === id);
     setPracticas(prev => prev.filter(p => p.id !== id));
     // Eliminar también de los horarios
-    setHorarios(prev => prev.filter(h => h.practicaId !== id));
+    setHorarios(prev => prev.map(h => ({
+      ...h,
+      practicaIds: h.practicaIds.filter(pId => pId !== id)
+    })).filter(h => h.practicaIds.length > 0));
     toast({
       title: "Práctica eliminada",
       description: `"${practica?.titulo}" se ha eliminado correctamente.`
@@ -72,25 +75,47 @@ export const useMatrizData = () => {
   };
 
   const addToSchedule = (practicaId: string, dia: string, franja: string) => {
-    // Verificar si ya hay algo programado en ese momento
+    // Buscar entrada existente para ese día y franja
     const existingEntry = horarios.find(h => h.dia === dia && h.franja === franja);
-    if (existingEntry) {
-      toast({
-        title: "¡Oops!",
-        description: "Ya tienes una práctica programada en ese momento.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const newEntry: HorarioEntry = {
-      id: `horario-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      practicaId,
-      dia,
-      franja
-    };
     
-    setHorarios(prev => [...prev, newEntry]);
+    if (existingEntry) {
+      // Verificar si ya tiene 3 actividades
+      if (existingEntry.practicaIds.length >= 3) {
+        toast({
+          title: "¡Límite alcanzado!",
+          description: "Solo puedes elegir hasta 3 actividades en este horario.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Verificar si la práctica ya está asignada
+      if (existingEntry.practicaIds.includes(practicaId)) {
+        toast({
+          title: "Ya programada",
+          description: "Esta práctica ya está en este horario.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Añadir la práctica a la entrada existente
+      setHorarios(prev => prev.map(h => 
+        h.id === existingEntry.id 
+          ? { ...h, practicaIds: [...h.practicaIds, practicaId] }
+          : h
+      ));
+    } else {
+      // Crear nueva entrada
+      const newEntry: HorarioEntry = {
+        id: `horario-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        practicaIds: [practicaId],
+        dia,
+        franja
+      };
+      setHorarios(prev => [...prev, newEntry]);
+    }
+    
     const practica = practicas.find(p => p.id === practicaId);
     toast({
       title: "Añadido al horario",
@@ -98,8 +123,23 @@ export const useMatrizData = () => {
     });
   };
 
-  const removeFromSchedule = (horarioId: string) => {
-    setHorarios(prev => prev.filter(h => h.id !== horarioId));
+  const removeFromSchedule = (horarioId: string, practicaId?: string) => {
+    if (practicaId) {
+      // Remover práctica específica de una entrada
+      setHorarios(prev => prev.map(h => {
+        if (h.id === horarioId) {
+          const newPracticaIds = h.practicaIds.filter(id => id !== practicaId);
+          return newPracticaIds.length > 0 
+            ? { ...h, practicaIds: newPracticaIds }
+            : null;
+        }
+        return h;
+      }).filter(Boolean) as HorarioEntry[]);
+    } else {
+      // Remover toda la entrada
+      setHorarios(prev => prev.filter(h => h.id !== horarioId));
+    }
+    
     toast({
       title: "Eliminado del horario",
       description: "La práctica se ha eliminado del horario."
@@ -164,6 +204,26 @@ export const useMatrizData = () => {
     reader.readAsText(file);
   };
 
+  const moveActivityInSchedule = (horarioId: string, practicaId: string, direction: 'up' | 'down') => {
+    setHorarios(prev => prev.map(h => {
+      if (h.id === horarioId) {
+        const currentIndex = h.practicaIds.indexOf(practicaId);
+        if (currentIndex === -1) return h;
+        
+        const newPracticaIds = [...h.practicaIds];
+        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+        
+        if (targetIndex >= 0 && targetIndex < newPracticaIds.length) {
+          [newPracticaIds[currentIndex], newPracticaIds[targetIndex]] = 
+          [newPracticaIds[targetIndex], newPracticaIds[currentIndex]];
+        }
+        
+        return { ...h, practicaIds: newPracticaIds };
+      }
+      return h;
+    }));
+  };
+
   return {
     practicas,
     horarios,
@@ -172,6 +232,7 @@ export const useMatrizData = () => {
     deletePractica,
     addToSchedule,
     removeFromSchedule,
+    moveActivityInSchedule,
     resetToDefault,
     exportData,
     importData

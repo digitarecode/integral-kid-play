@@ -18,7 +18,7 @@ export interface ModuloConfig {
 
 export interface HorarioEntry {
   id: string;
-  practicaId: string;
+  practicaIds: string[]; // Cambiado para soportar múltiples prácticas
   dia: string;
   franja: string;
 }

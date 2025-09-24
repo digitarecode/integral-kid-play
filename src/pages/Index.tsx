@@ -32,6 +32,7 @@ const Index = () => {
     deletePractica,
     addToSchedule,
     removeFromSchedule,
+    moveActivityInSchedule,
     resetToDefault,
     exportData,
     importData
@@ -368,8 +369,10 @@ const Index = () => {
                 <div className="text-3xl mb-2">⚡</div>
                 <div className="text-2xl font-bold">
                   {Math.round(horarios.reduce((acc, h) => {
-                    const practica = practicas.find(p => p.id === h.practicaId);
-                    return acc + (practica?.duracion || 0);
+                    return acc + h.practicaIds.reduce((subAcc, practicaId) => {
+                      const practica = practicas.find(p => p.id === practicaId);
+                      return subAcc + (practica?.duracion || 0);
+                    }, 0);
                   }, 0) / 7)}
                 </div>
                 <div className="text-sm text-muted-foreground">Min/día promedio</div>
