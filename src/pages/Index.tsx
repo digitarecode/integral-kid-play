@@ -17,8 +17,11 @@ import {
   Upload, 
   RotateCcw, 
   BookOpen, 
-  Star 
+  Star,
+  Camera 
 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
   const {
@@ -90,6 +93,76 @@ const Index = () => {
     }
   };
 
+  const handleSaveScheduleAsImage = async () => {
+    try {
+      const scheduleElement = document.getElementById('weekly-schedule');
+      if (!scheduleElement) {
+        toast({
+          title: "Error",
+          description: "No se pudo encontrar el calendario para capturar",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const canvas = await html2canvas(scheduleElement, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      // Convertir canvas a blob
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+
+        const fileName = 'mi_semana.png';
+
+        // Intentar usar Web Share API en móviles
+        if (navigator.share && navigator.canShare?.({ files: [new File([blob], fileName, { type: 'image/png' })] })) {
+          try {
+            await navigator.share({
+              files: [new File([blob], fileName, { type: 'image/png' })],
+              title: 'Mi Agenda Semanal',
+              text: '¡Mira mi agenda de prácticas integrales!'
+            });
+            toast({
+              title: "¡Imagen compartida!",
+              description: "Tu agenda se compartió exitosamente"
+            });
+            return;
+          } catch (error) {
+            // Si falla el share, continuar con descarga normal
+            console.log('Share API failed, falling back to download');
+          }
+        }
+
+        // Descarga tradicional
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        toast({
+          title: "¡Tu semana se guardó como imagen!",
+          description: "La imagen se descargó exitosamente"
+        });
+      }, 'image/png');
+
+    } catch (error) {
+      console.error('Error capturing schedule:', error);
+      toast({
+        title: "Error",
+        description: "No se pudo guardar la imagen",
+        variant: "destructive"
+      });
+    }
+  };
+
   const selectedModuleConfig = selectedModule ? 
     modulosConfig.find(m => m.id === selectedModule) : null;
 
@@ -141,6 +214,18 @@ const Index = () => {
                   className="hidden"
                 />
               </label>
+
+              {showSchedule && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleSaveScheduleAsImage}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 hover:from-purple-600 hover:to-pink-600"
+                >
+                  <Camera className="h-4 w-4 mr-2" />
+                  Guardar imagen
+                </Button>
+              )}
               
               <Button variant="outline" size="sm" onClick={resetToDefault}>
                 <RotateCcw className="h-4 w-4 mr-2" />
@@ -293,6 +378,9 @@ const Index = () => {
           </div>
         )}
       </main>
+
+      {/* Toaster para notificaciones */}
+      <div id="toast-container"></div>
 
       {/* Dialogs */}
       <PracticaDialog

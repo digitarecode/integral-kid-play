@@ -42,7 +42,7 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule }: We
   };
 
   return (
-    <div className="w-full">
+    <div id="weekly-schedule" className="w-full">
       <h2 className="text-2xl font-bold mb-6 text-center">Mi Agenda Semanal 📅</h2>
       
       <div className="overflow-x-auto">
