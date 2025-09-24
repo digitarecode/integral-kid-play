@@ -32,6 +32,13 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
     noche: '🌙 Noche'
   };
 
+  const franjasColores = {
+    mañana: 'bg-orange-100 text-orange-800 border-orange-200',
+    'media-mañana': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    tarde: 'bg-amber-100 text-amber-800 border-amber-200',
+    noche: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+  };
+
   const diasLabels = {
     lunes: 'Lun',
     martes: 'Mar',
@@ -63,7 +70,7 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
             {franjasHorarias.map(franja => (
               <React.Fragment key={franja}>
                 {/* Label de franja */}
-                <div className="p-3 text-sm font-medium bg-muted rounded-lg flex items-center justify-center text-center">
+                <div className={`p-3 text-sm font-medium rounded-lg flex items-center justify-center text-center border ${franjasColores[franja as keyof typeof franjasColores]}`}>
                   {franjasLabels[franja as keyof typeof franjasLabels]}
                 </div>
                 
@@ -73,53 +80,64 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                   const practicasEnHorario = horario ? horario.practicaIds.map(id => getPracticaById(id)).filter(Boolean) as Practica[] : [];
                   
                   return (
-                    <Card key={`${dia}-${franja}`} className="p-2 min-h-[100px] relative">
+                    <Card key={`${dia}-${franja}`} className="p-2 min-h-[120px] relative">
                       {practicasEnHorario.length > 0 ? (
-                        <div className="space-y-1 h-full">
+                        <div className="space-y-2 h-full">
                           {practicasEnHorario.map((practica, index) => (
                             <div
                               key={`${practica.id}-${index}`}
                               className={cn(
-                                'rounded p-2 text-xs relative group border',
-                                `bg-${getModuloColor(practica.modulo)}-light border-${getModuloColor(practica.modulo)}/30`
+                                'rounded-lg p-3 text-xs relative group border-2 transition-all hover:shadow-sm',
+                                // Aplicar colores consistentes por módulo
+                                practica.modulo === 'cuerpo' && 'bg-blue-50 border-blue-200 text-blue-900',
+                                practica.modulo === 'mente' && 'bg-green-50 border-green-200 text-green-900',
+                                practica.modulo === 'espiritu' && 'bg-purple-50 border-purple-200 text-purple-900',
+                                practica.modulo === 'sombra' && 'bg-gray-50 border-gray-200 text-gray-900',
+                                practica.modulo === 'etica' && 'bg-pink-50 border-pink-200 text-pink-900',
+                                practica.modulo === 'sexualidad' && 'bg-rose-50 border-rose-200 text-rose-900',
+                                practica.modulo === 'trabajo' && 'bg-orange-50 border-orange-200 text-orange-900',
+                                practica.modulo === 'emociones' && 'bg-yellow-50 border-yellow-200 text-yellow-900',
+                                practica.modulo === 'relaciones' && 'bg-cyan-50 border-cyan-200 text-cyan-900'
                               )}
                             >
                               {/* Botones de control */}
-                              <div className="absolute -top-1 -right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <div className="absolute -top-1 -right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                                 {index > 0 && onMoveActivity && (
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-4 w-4 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                                    className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
                                     onClick={() => onMoveActivity(horario!.id, practica.id, 'up')}
                                   >
-                                    <ChevronUp className="h-2 w-2" />
+                                    <ChevronUp className="h-3 w-3" />
                                   </Button>
                                 )}
                                 {index < practicasEnHorario.length - 1 && onMoveActivity && (
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-4 w-4 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                                    className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
                                     onClick={() => onMoveActivity(horario!.id, practica.id, 'down')}
                                   >
-                                    <ChevronDown className="h-2 w-2" />
+                                    <ChevronDown className="h-3 w-3" />
                                   </Button>
                                 )}
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-4 w-4 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
+                                  className="h-5 w-5 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
                                   onClick={() => onRemoveFromSchedule(horario!.id, practica.id)}
                                 >
-                                  <X className="h-2 w-2" />
+                                  <X className="h-3 w-3" />
                                 </Button>
                               </div>
                               
-                              <div className="text-xs font-medium mb-1 line-clamp-1">
-                                {practica.icono} {practica.titulo}
+                              {/* Contenido de la tarjeta - sin truncar texto */}
+                              <div className="text-xs font-semibold mb-1 leading-tight">
+                                <span className="mr-1">{practica.icono}</span>
+                                <span className="break-words">{practica.titulo}</span>
                               </div>
-                              <div className="text-xs opacity-75">
+                              <div className="text-xs opacity-75 font-medium">
                                 {practica.duracion} min
                               </div>
                             </div>

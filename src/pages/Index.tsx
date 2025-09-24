@@ -106,11 +106,16 @@ const Index = () => {
         return;
       }
 
+      // Configuración optimizada para captura de texto completo
       const canvas = await html2canvas(scheduleElement, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 3, // Mayor escala para mejor calidad de texto
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
+        logging: false,
+        foreignObjectRendering: true,
+        width: scheduleElement.scrollWidth,
+        height: scheduleElement.scrollHeight
       });
 
       // Convertir canvas a blob
