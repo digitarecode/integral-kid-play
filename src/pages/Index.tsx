@@ -17,11 +17,8 @@ import {
   Upload, 
   RotateCcw, 
   BookOpen, 
-  Star,
-  Share2,
-  Camera 
+  Star
 } from 'lucide-react';
-import html2canvas from 'html2canvas';
 import { toast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -95,132 +92,6 @@ const Index = () => {
     }
   };
 
-  const handleSaveScheduleAsImage = async () => {
-    try {
-      const scheduleElement = document.getElementById('weekly-schedule');
-      if (!scheduleElement) {
-        toast({
-          title: "Error",
-          description: "No se pudo encontrar el calendario para capturar",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Configuración optimizada para captura de texto completo
-      const canvas = await html2canvas(scheduleElement, {
-        backgroundColor: '#ffffff',
-        scale: 3, // Mayor escala para mejor calidad de texto
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        foreignObjectRendering: true,
-        width: scheduleElement.scrollWidth,
-        height: scheduleElement.scrollHeight
-      });
-
-      // Convertir canvas a blob y descargar directamente
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-
-        const fileName = 'mi-agenda-semanal.png';
-        
-        // Descarga directa
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        toast({
-          title: "¡Imagen descargada!",
-          description: "Tu agenda semanal se descargó como mi-agenda-semanal.png"
-        });
-      }, 'image/png');
-
-    } catch (error) {
-      console.error('Error capturing schedule:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo guardar la imagen",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleShareScheduleAsImage = async () => {
-    try {
-      const scheduleElement = document.getElementById('weekly-schedule');
-      if (!scheduleElement) {
-        toast({
-          title: "Error",
-          description: "No se pudo encontrar el calendario para capturar",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Configuración optimizada para captura de texto completo
-      const canvas = await html2canvas(scheduleElement, {
-        backgroundColor: '#ffffff',
-        scale: 3, // Mayor escala para mejor calidad de texto
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        foreignObjectRendering: true,
-        width: scheduleElement.scrollWidth,
-        height: scheduleElement.scrollHeight
-      });
-
-      // Convertir canvas a blob y compartir
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-
-        const fileName = 'mi-agenda-semanal.png';
-        const file = new File([blob], fileName, { type: 'image/png' });
-
-        // Usar Web Share API si está disponible
-        if (navigator.share && navigator.canShare?.({ files: [file] })) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: 'Mi Agenda Semanal',
-              text: '¡Mira mi agenda de prácticas integrales!'
-            });
-            toast({
-              title: "¡Imagen compartida!",
-              description: "Tu agenda se compartió exitosamente"
-            });
-          } catch (error) {
-            if (error.name !== 'AbortError') {
-              toast({
-                title: "Error al compartir",
-                description: "No se pudo compartir la imagen",
-                variant: "destructive"
-              });
-            }
-          }
-        } else {
-          toast({
-            title: "Función no disponible",
-            description: "Tu navegador no soporta la función de compartir",
-            variant: "destructive"
-          });
-        }
-      }, 'image/png');
-
-    } catch (error) {
-      console.error('Error sharing schedule:', error);
-      toast({
-        title: "Error",
-        description: "No se pudo compartir la imagen",
-        variant: "destructive"
-      });
-    }
-  };
 
   const selectedModuleConfig = selectedModule ? 
     modulosConfig.find(m => m.id === selectedModule) : null;
@@ -274,29 +145,6 @@ const Index = () => {
                 />
               </label>
 
-              {showSchedule && (
-                <>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleSaveScheduleAsImage}
-                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 hover:from-purple-600 hover:to-pink-600"
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    Guardar imagen
-                  </Button>
-                  
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleShareScheduleAsImage}
-                    className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white border-0 hover:from-blue-600 hover:to-cyan-600"
-                  >
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Compartir
-                  </Button>
-                </>
-              )}
               
               <Button variant="outline" size="sm" onClick={resetToDefault}>
                 <RotateCcw className="h-4 w-4 mr-2" />
