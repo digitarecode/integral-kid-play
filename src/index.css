@@ -139,5 +139,52 @@ Colores vibrantes y amigables siguiendo la metodología de Ken Wilber
 
   body {
     @apply bg-background text-foreground;
+    /* Prevenir zoom en iOS */
+    -webkit-text-size-adjust: 100%;
+    /* Mejorar rendimiento de scroll */
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Safe area para notch de móviles */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Prevenir scroll horizontal no deseado */
+  html {
+    overflow-x: hidden;
+  }
+  
+  /* Mejorar legibilidad en pantallas pequeñas */
+  @media (max-width: 640px) {
+    body {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+  }
+  
+  /* Optimizaciones para touch devices */
+  button, [role="button"], .cursor-pointer {
+    touch-action: manipulation;
+  }
+  
+  /* Mejorar performance en elementos con hover */
+  @media (hover: hover) and (pointer: fine) {
+    .hover\\:scale-105:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  /* Asegurar que imágenes sean responsivas */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Mejorar contraste en modo oscuro */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+    }
   }
 }

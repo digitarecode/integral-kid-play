@@ -27,37 +27,53 @@ export const PracticaCard = ({ practica, onEdit, onDelete, onAddToSchedule, clas
   };
 
   return (
-    <Card className={cn('p-4 hover:shadow-md transition-shadow', className)}>
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          {practica.icono && <span className="text-xl">{practica.icono}</span>}
-          <h4 className="font-semibold text-lg">{practica.titulo}</h4>
+    <Card className={cn('p-3 sm:p-4 hover:shadow-md transition-shadow', className)}>
+      <div className="flex flex-col sm:flex-row items-start justify-between mb-3 gap-3">
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          {practica.icono && <span className="text-lg sm:text-xl flex-shrink-0">{practica.icono}</span>}
+          <div className="min-w-0 flex-1">
+            <h4 className="font-semibold text-sm sm:text-lg leading-tight break-words">{practica.titulo}</h4>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 break-words">{practica.descripcion}</p>
+          </div>
         </div>
-        <div className="flex gap-1">
-          <Button size="sm" variant="ghost" onClick={onEdit}>
+        <div className="flex gap-1 flex-shrink-0">
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={onEdit}
+            className="min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
+          >
             <Edit className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="ghost" onClick={onDelete}>
+          <Button 
+            size="sm" 
+            variant="ghost" 
+            onClick={onDelete}
+            className="min-h-[44px] min-w-[44px] sm:min-h-auto sm:min-w-auto"
+          >
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </div>
       
-      <p className="text-sm text-muted-foreground mb-3">{practica.descripcion}</p>
-      
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Badge className={nivelColors[practica.nivel]}>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Badge className={`${nivelColors[practica.nivel]} text-xs`}>
             {nivelTexts[practica.nivel]}
           </Badge>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
+          <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
             {practica.duracion} min
           </div>
         </div>
         
         {onAddToSchedule && (
-          <Button size="sm" variant="outline" onClick={onAddToSchedule}>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            onClick={onAddToSchedule}
+            className="min-h-[44px] px-3 sm:px-4 w-full sm:w-auto text-xs sm:text-sm"
+          >
             Añadir al horario
           </Button>
         )}

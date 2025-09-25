@@ -26,20 +26,24 @@ export const ModuleCard = ({ modulo, practicasCount, onClick, className }: Modul
     <Card 
       className={cn(
         'cursor-pointer transition-all duration-300 transform hover:scale-105 hover:shadow-xl',
-        'p-6 min-h-[160px] flex flex-col items-center justify-center text-center',
-        'border-2 border-transparent hover:border-white/20',
+        'p-4 sm:p-6 min-h-[140px] sm:min-h-[160px] flex flex-col items-center justify-center text-center',
+        'border-2 border-transparent hover:border-white/20 active:scale-95',
+        // Touch-friendly sizing
+        'touch-manipulation select-none',
         colorClasses[modulo.color as keyof typeof colorClasses],
         className
       )}
       onClick={onClick}
     >
-      <div className="text-4xl mb-3">{modulo.icono}</div>
-      <h3 className="text-xl font-bold mb-2">{modulo.nombre}</h3>
-      <p className="text-sm opacity-90">
+      <div className="text-2xl sm:text-3xl lg:text-4xl mb-2 sm:mb-3">{modulo.icono}</div>
+      <h3 className="text-sm sm:text-lg lg:text-xl font-bold mb-1 sm:mb-2 leading-tight px-1">
+        {modulo.nombre}
+      </h3>
+      <p className="text-xs sm:text-sm opacity-90">
         {practicasCount} {practicasCount === 1 ? 'práctica' : 'prácticas'}
       </p>
       {modulo.esPrincipal && (
-        <div className="mt-2 px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
+        <div className="mt-2 px-2 sm:px-3 py-1 bg-white/20 rounded-full text-xs font-medium">
           Principal
         </div>
       )}

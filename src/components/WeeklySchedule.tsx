@@ -50,116 +50,199 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
   };
 
   return (
-    <div id="weekly-schedule" className="w-full">
-      <h2 className="text-2xl font-bold mb-6 text-center">Mi Agenda Semanal 📅</h2>
+    <div id="weekly-schedule" className="w-full space-y-4">
+      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6 text-center">
+        Mi Agenda Semanal 📅
+      </h2>
       
-      <div className="overflow-x-auto">
-        <div className="min-w-[800px]">
-          <div className="grid grid-cols-8 gap-2">
-            {/* Header vacío */}
-            <div className="p-3"></div>
-            
-            {/* Headers de días */}
-            {diasSemana.map(dia => (
-              <div key={dia} className="p-3 text-center font-semibold bg-muted rounded-lg">
-                {diasLabels[dia as keyof typeof diasLabels]}
-              </div>
-            ))}
-            
-            {/* Filas por franja horaria */}
-            {franjasHorarias.map(franja => (
-              <React.Fragment key={franja}>
-                {/* Label de franja */}
-                <div className={`p-3 text-sm font-medium rounded-lg flex items-center justify-center text-center border ${franjasColores[franja as keyof typeof franjasColores]}`}>
-                  {franjasLabels[franja as keyof typeof franjasLabels]}
+      {/* Vista Desktop/Tablet */}
+      <div className="hidden md:block">
+        <div className="overflow-x-auto">
+          <div className="min-w-[800px]">
+            <div className="grid grid-cols-8 gap-2">
+              {/* Header vacío */}
+              <div className="p-3"></div>
+              
+              {/* Headers de días */}
+              {diasSemana.map(dia => (
+                <div key={dia} className="p-2 lg:p-3 text-center text-xs lg:text-sm font-semibold bg-muted rounded-lg">
+                  {diasLabels[dia as keyof typeof diasLabels]}
                 </div>
-                
-                {/* Celdas para cada día */}
-                {diasSemana.map(dia => {
-                  const horario = getHorarioForDayAndFranja(dia, franja);
-                  const practicasEnHorario = horario ? horario.practicaIds.map(id => getPracticaById(id)).filter(Boolean) as Practica[] : [];
+              ))}
+              
+              {/* Filas por franja horaria */}
+              {franjasHorarias.map(franja => (
+                <React.Fragment key={franja}>
+                  {/* Label de franja */}
+                  <div className={`p-2 lg:p-3 text-xs font-medium rounded-lg flex items-center justify-center text-center border ${franjasColores[franja as keyof typeof franjasColores]}`}>
+                    <span className="hidden lg:inline">{franjasLabels[franja as keyof typeof franjasLabels]}</span>
+                    <span className="lg:hidden text-center">
+                      {franja === 'mañana' ? '🌅' : 
+                       franja === 'media-mañana' ? '☀️' : 
+                       franja === 'tarde' ? '🌞' : '🌙'}
+                    </span>
+                  </div>
                   
-                  return (
-                    <Card key={`${dia}-${franja}`} className="p-2 min-h-[120px] relative">
-                      {practicasEnHorario.length > 0 ? (
-                        <div className="space-y-2 h-full">
-                          {practicasEnHorario.map((practica, index) => (
-                            <div
-                              key={`${practica.id}-${index}`}
-                              className={cn(
-                                'rounded-lg p-3 text-xs relative group border-2 transition-all hover:shadow-sm',
-                                // Aplicar colores consistentes por módulo
-                                practica.modulo === 'cuerpo' && 'bg-blue-50 border-blue-200 text-blue-900',
-                                practica.modulo === 'mente' && 'bg-green-50 border-green-200 text-green-900',
-                                practica.modulo === 'espiritu' && 'bg-purple-50 border-purple-200 text-purple-900',
-                                practica.modulo === 'sombra' && 'bg-gray-50 border-gray-200 text-gray-900',
-                                practica.modulo === 'etica' && 'bg-pink-50 border-pink-200 text-pink-900',
-                                practica.modulo === 'sexualidad' && 'bg-rose-50 border-rose-200 text-rose-900',
-                                practica.modulo === 'trabajo' && 'bg-orange-50 border-orange-200 text-orange-900',
-                                practica.modulo === 'emociones' && 'bg-yellow-50 border-yellow-200 text-yellow-900',
-                                practica.modulo === 'relaciones' && 'bg-cyan-50 border-cyan-200 text-cyan-900'
-                              )}
-                            >
-                              {/* Botones de control */}
-                              <div className="absolute -top-1 -right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                {index > 0 && onMoveActivity && (
+                  {/* Celdas para cada día */}
+                  {diasSemana.map(dia => {
+                    const horario = getHorarioForDayAndFranja(dia, franja);
+                    const practicasEnHorario = horario ? horario.practicaIds.map(id => getPracticaById(id)).filter(Boolean) as Practica[] : [];
+                    
+                    return (
+                      <Card key={`${dia}-${franja}`} className="p-1 lg:p-2 min-h-[100px] lg:min-h-[120px] relative">
+                        {practicasEnHorario.length > 0 ? (
+                          <div className="space-y-1 lg:space-y-2 h-full">
+                            {practicasEnHorario.map((practica, index) => (
+                              <div
+                                key={`${practica.id}-${index}`}
+                                className={cn(
+                                  'rounded-lg p-2 lg:p-3 text-xs relative group border-2 transition-all hover:shadow-sm',
+                                  // Aplicar colores consistentes por módulo
+                                  practica.modulo === 'cuerpo' && 'bg-blue-50 border-blue-200 text-blue-900',
+                                  practica.modulo === 'mente' && 'bg-green-50 border-green-200 text-green-900',
+                                  practica.modulo === 'espiritu' && 'bg-purple-50 border-purple-200 text-purple-900',
+                                  practica.modulo === 'sombra' && 'bg-gray-50 border-gray-200 text-gray-900',
+                                  practica.modulo === 'etica' && 'bg-pink-50 border-pink-200 text-pink-900',
+                                  practica.modulo === 'sexualidad' && 'bg-rose-50 border-rose-200 text-rose-900',
+                                  practica.modulo === 'trabajo' && 'bg-orange-50 border-orange-200 text-orange-900',
+                                  practica.modulo === 'emociones' && 'bg-yellow-50 border-yellow-200 text-yellow-900',
+                                  practica.modulo === 'relaciones' && 'bg-cyan-50 border-cyan-200 text-cyan-900'
+                                )}
+                              >
+                                {/* Botones de control */}
+                                <div className="absolute -top-1 -right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                  {index > 0 && onMoveActivity && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                                      onClick={() => onMoveActivity(horario!.id, practica.id, 'up')}
+                                    >
+                                      <ChevronUp className="h-3 w-3" />
+                                    </Button>
+                                  )}
+                                  {index < practicasEnHorario.length - 1 && onMoveActivity && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
+                                      onClick={() => onMoveActivity(horario!.id, practica.id, 'down')}
+                                    >
+                                      <ChevronDown className="h-3 w-3" />
+                                    </Button>
+                                  )}
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-                                    onClick={() => onMoveActivity(horario!.id, practica.id, 'up')}
+                                    className="h-5 w-5 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
+                                    onClick={() => onRemoveFromSchedule(horario!.id, practica.id)}
                                   >
-                                    <ChevronUp className="h-3 w-3" />
+                                    <X className="h-3 w-3" />
                                   </Button>
-                                )}
-                                {index < practicasEnHorario.length - 1 && onMoveActivity && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-                                    onClick={() => onMoveActivity(horario!.id, practica.id, 'down')}
-                                  >
-                                    <ChevronDown className="h-3 w-3" />
-                                  </Button>
-                                )}
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-5 w-5 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
-                                  onClick={() => onRemoveFromSchedule(horario!.id, practica.id)}
-                                >
-                                  <X className="h-3 w-3" />
-                                </Button>
+                                </div>
+                                
+                                {/* Contenido de la tarjeta - sin truncar texto */}
+                                <div className="text-xs font-semibold mb-1 leading-tight">
+                                  <span className="mr-1">{practica.icono}</span>
+                                  <span className="break-words">{practica.titulo}</span>
+                                </div>
+                                <div className="text-xs opacity-75 font-medium">
+                                  {practica.duracion} min
+                                </div>
                               </div>
-                              
-                              {/* Contenido de la tarjeta - sin truncar texto */}
-                              <div className="text-xs font-semibold mb-1 leading-tight">
-                                <span className="mr-1">{practica.icono}</span>
-                                <span className="break-words">{practica.titulo}</span>
+                            ))}
+                            {practicasEnHorario.length < 3 && (
+                              <div className="text-xs text-muted-foreground text-center opacity-50 mt-1">
+                                +{3 - practicasEnHorario.length} más
                               </div>
-                              <div className="text-xs opacity-75 font-medium">
-                                {practica.duracion} min
-                              </div>
-                            </div>
-                          ))}
-                          {practicasEnHorario.length < 3 && (
-                            <div className="text-xs text-muted-foreground text-center opacity-50 mt-1">
-                              +{3 - practicasEnHorario.length} más
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="h-full flex items-center justify-center text-muted-foreground text-xs border-2 border-dashed border-muted rounded">
-                          Vacío
-                        </div>
-                      )}
-                    </Card>
-                  );
-                })}
-              </React.Fragment>
-            ))}
+                            )}
+                          </div>
+                        ) : (
+                          <div className="h-full flex items-center justify-center text-muted-foreground text-xs border-2 border-dashed border-muted rounded">
+                            Vacío
+                          </div>
+                        )}
+                      </Card>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Vista Mobile */}
+      <div className="md:hidden space-y-4">
+        {diasSemana.map(dia => (
+          <Card key={dia} className="p-4">
+            <h3 className="text-lg font-bold mb-3 text-center">
+              {dia.charAt(0).toUpperCase() + dia.slice(1)}
+            </h3>
+            <div className="space-y-3">
+              {franjasHorarias.map(franja => {
+                const horario = getHorarioForDayAndFranja(dia, franja);
+                const practicasEnHorario = horario ? horario.practicaIds.map(id => getPracticaById(id)).filter(Boolean) as Practica[] : [];
+                
+                return (
+                  <div key={`${dia}-${franja}`} className="border rounded-lg p-3">
+                    <div className={`text-sm font-medium mb-2 p-2 rounded text-center ${franjasColores[franja as keyof typeof franjasColores]}`}>
+                      {franjasLabels[franja as keyof typeof franjasLabels]}
+                    </div>
+                    
+                    {practicasEnHorario.length > 0 ? (
+                      <div className="space-y-2">
+                        {practicasEnHorario.map((practica, index) => (
+                          <div
+                            key={`${practica.id}-${index}`}
+                            className={cn(
+                              'rounded-lg p-3 text-sm relative group border-2 transition-all',
+                              // Touch-friendly sizing
+                              'min-h-[60px] flex items-center',
+                              // Aplicar colores consistentes por módulo
+                              practica.modulo === 'cuerpo' && 'bg-blue-50 border-blue-200 text-blue-900',
+                              practica.modulo === 'mente' && 'bg-green-50 border-green-200 text-green-900',
+                              practica.modulo === 'espiritu' && 'bg-purple-50 border-purple-200 text-purple-900',
+                              practica.modulo === 'sombra' && 'bg-gray-50 border-gray-200 text-gray-900',
+                              practica.modulo === 'etica' && 'bg-pink-50 border-pink-200 text-pink-900',
+                              practica.modulo === 'sexualidad' && 'bg-rose-50 border-rose-200 text-rose-900',
+                              practica.modulo === 'trabajo' && 'bg-orange-50 border-orange-200 text-orange-900',
+                              practica.modulo === 'emociones' && 'bg-yellow-50 border-yellow-200 text-yellow-900',
+                              practica.modulo === 'relaciones' && 'bg-cyan-50 border-cyan-200 text-cyan-900'
+                            )}
+                          >
+                            <div className="flex-1">
+                              <div className="font-semibold mb-1 leading-tight">
+                                <span className="mr-2 text-lg">{practica.icono}</span>
+                                <span className="break-words">{practica.titulo}</span>
+                              </div>
+                              <div className="text-sm opacity-75 font-medium">
+                                {practica.duracion} minutos
+                              </div>
+                            </div>
+                            
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full ml-2"
+                              onClick={() => onRemoveFromSchedule(horario!.id, practica.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground text-sm py-4 border-2 border-dashed border-muted rounded">
+                        Sin actividades
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );

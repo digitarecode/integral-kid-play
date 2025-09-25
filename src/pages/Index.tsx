@@ -92,7 +92,6 @@ const Index = () => {
     }
   };
 
-
   const selectedModuleConfig = selectedModule ? 
     modulosConfig.find(m => m.id === selectedModule) : null;
 
@@ -102,39 +101,52 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="text-3xl">🌟</div>
+      <header className="border-b bg-card/50 backdrop-blur sticky top-0 z-50">
+        <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 lg:py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="text-2xl sm:text-3xl">🌟</div>
               <div>
-                <h1 className="text-2xl font-bold">Matriz Integral</h1>
-                <p className="text-sm text-muted-foreground">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold leading-tight">Matriz Integral</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Mi práctica diaria con Ken Wilber
                 </p>
               </div>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setShowSchedule(!showSchedule)}
+                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm flex-1 sm:flex-initial"
               >
-                <Calendar className="h-4 w-4 mr-2" />
-                {showSchedule ? 'Ver Módulos' : 'Mi Agenda'}
+                <Calendar className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="truncate">{showSchedule ? 'Ver Módulos' : 'Mi Agenda'}</span>
               </Button>
               
-              <Button variant="outline" size="sm" onClick={exportData}>
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={exportData}
+                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
+              >
+                <Download className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Exportar</span>
+                <span className="sm:hidden">Exp</span>
               </Button>
               
               <label className="cursor-pointer">
-                <Button variant="outline" size="sm" asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  asChild 
+                  className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
+                >
                   <span>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Importar
+                    <Upload className="h-4 w-4 mr-1 sm:mr-2" />
+                    <span className="hidden sm:inline">Importar</span>
+                    <span className="sm:hidden">Imp</span>
                   </span>
                 </Button>
                 <input
@@ -145,17 +157,22 @@ const Index = () => {
                 />
               </label>
 
-              
-              <Button variant="outline" size="sm" onClick={resetToDefault}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Restablecer
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={resetToDefault}
+                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
+              >
+                <RotateCcw className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Restablecer</span>
+                <span className="sm:hidden">Reset</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 pb-safe">
         {showSchedule ? (
           /* Vista de Agenda */
           <WeeklySchedule
@@ -165,30 +182,39 @@ const Index = () => {
           />
         ) : selectedModule ? (
           /* Vista de prácticas de un módulo */
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Button variant="outline" onClick={handleBackToModules}>
+          <div className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <Button 
+                  variant="outline" 
+                  onClick={handleBackToModules}
+                  className="min-h-[44px] px-4 self-start"
+                >
                   ← Volver a módulos
                 </Button>
                 <div className="flex items-center gap-3">
-                  <div className="text-2xl">{selectedModuleConfig?.icono}</div>
+                  <div className="text-xl sm:text-2xl">{selectedModuleConfig?.icono}</div>
                   <div>
-                    <h2 className="text-2xl font-bold">{selectedModuleConfig?.nombre}</h2>
-                    <p className="text-muted-foreground">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold leading-tight">
+                      {selectedModuleConfig?.nombre}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
                       {getPracticasByModule(selectedModule).length} prácticas disponibles
                     </p>
                   </div>
                 </div>
               </div>
               
-              <Button onClick={() => setPracticaDialogOpen(true)}>
+              <Button 
+                onClick={() => setPracticaDialogOpen(true)}
+                className="min-h-[44px] px-4 w-full sm:w-auto"
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Práctica
               </Button>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
               {getPracticasByModule(selectedModule).map(practica => (
                 <PracticaCard
                   key={practica.id}
@@ -200,13 +226,16 @@ const Index = () => {
               ))}
               
               {getPracticasByModule(selectedModule).length === 0 && (
-                <Card className="p-8 text-center">
-                  <div className="text-4xl mb-4">📝</div>
-                  <h3 className="text-lg font-semibold mb-2">No hay prácticas aún</h3>
-                  <p className="text-muted-foreground mb-4">
+                <Card className="p-6 sm:p-8 text-center">
+                  <div className="text-3xl sm:text-4xl mb-4">📝</div>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">No hay prácticas aún</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
                     Añade tu primera práctica a este módulo
                   </p>
-                  <Button onClick={() => setPracticaDialogOpen(true)}>
+                  <Button 
+                    onClick={() => setPracticaDialogOpen(true)}
+                    className="min-h-[44px] px-4"
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Crear Primera Práctica
                   </Button>
@@ -216,13 +245,15 @@ const Index = () => {
           </div>
         ) : (
           /* Vista principal de módulos */
-          <div className="space-y-8">
-            <div className="text-center space-y-4">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="text-center space-y-3 sm:space-y-4">
               <div className="flex justify-center">
-                <div className="text-6xl">🌟</div>
+                <div className="text-4xl sm:text-5xl lg:text-6xl">🌟</div>
               </div>
-              <h2 className="text-3xl font-bold">¡Bienvenido a tu Matriz Integral!</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold leading-tight px-4">
+                ¡Bienvenido a tu Matriz Integral!
+              </h2>
+              <p className="text-sm sm:text-base lg:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
                 Explora los diferentes módulos y organiza tus prácticas diarias. 
                 Cada color representa un aspecto importante de tu crecimiento.
               </p>
@@ -230,13 +261,13 @@ const Index = () => {
 
             {/* Módulos Principales */}
             <section>
-              <div className="flex items-center gap-3 mb-6">
-                <Star className="h-6 w-6 text-yellow-500" />
-                <h3 className="text-2xl font-bold">Módulos Principales</h3>
-                <Badge variant="secondary">Los 4 cuadrantes</Badge>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6 px-2">
+                <Star className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" />
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold">Módulos Principales</h3>
+                <Badge variant="secondary" className="text-xs">Los 4 cuadrantes</Badge>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                 {modulosPrincipales.map(modulo => (
                   <ModuleCard
                     key={modulo.id}
@@ -250,42 +281,42 @@ const Index = () => {
 
             {/* Módulos Auxiliares */}
             <section>
-              <div className="flex items-center gap-3 mb-6">
-                <BookOpen className="h-6 w-6 text-blue-500" />
-                <h3 className="text-2xl font-bold">Módulos Auxiliares</h3>
-                <Badge variant="outline">Apoyo integral</Badge>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 mb-4 sm:mb-6 px-2">
+                <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold">Módulos Auxiliares</h3>
+                <Badge variant="outline" className="text-xs">Apoyo integral</Badge>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
                 {modulosAuxiliares.map(modulo => (
                   <ModuleCard
                     key={modulo.id}
                     modulo={modulo}
                     practicasCount={getPracticasByModule(modulo.id).length}
                     onClick={() => handleModuleClick(modulo.id)}
-                    className="min-h-[120px]"
+                    className="min-h-[100px] sm:min-h-[120px]"
                   />
                 ))}
               </div>
             </section>
 
             {/* Stats rápidas */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="p-6 text-center">
-                <div className="text-3xl mb-2">📚</div>
-                <div className="text-2xl font-bold">{practicas.length}</div>
-                <div className="text-sm text-muted-foreground">Prácticas totales</div>
+            <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <Card className="p-4 sm:p-6 text-center">
+                <div className="text-2xl sm:text-3xl mb-2">📚</div>
+                <div className="text-xl sm:text-2xl font-bold">{practicas.length}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Prácticas totales</div>
               </Card>
               
-              <Card className="p-6 text-center">
-                <div className="text-3xl mb-2">📅</div>
-                <div className="text-2xl font-bold">{horarios.length}</div>
-                <div className="text-sm text-muted-foreground">En mi agenda</div>
+              <Card className="p-4 sm:p-6 text-center">
+                <div className="text-2xl sm:text-3xl mb-2">📅</div>
+                <div className="text-xl sm:text-2xl font-bold">{horarios.length}</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">En mi agenda</div>
               </Card>
               
-              <Card className="p-6 text-center">
-                <div className="text-3xl mb-2">⚡</div>
-                <div className="text-2xl font-bold">
+              <Card className="p-4 sm:p-6 text-center">
+                <div className="text-2xl sm:text-3xl mb-2">⚡</div>
+                <div className="text-xl sm:text-2xl font-bold">
                   {Math.round(horarios.reduce((acc, h) => {
                     // Compatibilidad hacia atrás: manejar tanto estructura nueva como antigua
                     const practicaIds = h.practicaIds || (h as any).practicaId ? [(h as any).practicaId] : [];
@@ -295,7 +326,7 @@ const Index = () => {
                     }, 0);
                   }, 0) / 7)}
                 </div>
-                <div className="text-sm text-muted-foreground">Min/día promedio</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">Min/día promedio</div>
               </Card>
             </section>
           </div>
