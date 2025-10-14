@@ -25,9 +25,10 @@ interface PracticaDialogProps {
   onOpenChange: (open: boolean) => void;
   practica?: Practica | null;
   onSave: (practica: Omit<Practica, 'id'> & { id?: string }) => void;
+  currentModule?: string;
 }
 
-export const PracticaDialog = ({ open, onOpenChange, practica, onSave }: PracticaDialogProps) => {
+export const PracticaDialog = ({ open, onOpenChange, practica, onSave, currentModule }: PracticaDialogProps) => {
   const [formData, setFormData] = useState<{
     titulo: string;
     descripcion: string;
@@ -60,11 +61,11 @@ export const PracticaDialog = ({ open, onOpenChange, practica, onSave }: Practic
         descripcion: '',
         duracion: 15,
         nivel: 'facil',
-        modulo: 'cuerpo',
+        modulo: currentModule || 'cuerpo',
         icono: '🎯'
       });
     }
-  }, [practica, open]);
+  }, [practica, open, currentModule]);
 
   const handleSave = () => {
     if (formData.titulo.trim() && formData.descripcion.trim()) {

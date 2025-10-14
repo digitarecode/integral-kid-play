@@ -11,9 +11,10 @@ interface WeeklyScheduleProps {
   practicas: Practica[];
   onRemoveFromSchedule: (horarioId: string, practicaId?: string) => void;
   onMoveActivity?: (horarioId: string, practicaId: string, direction: 'up' | 'down') => void;
+  onQuickAdd?: (dia: string, franja: string) => void;
 }
 
-export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMoveActivity }: WeeklyScheduleProps) => {
+export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMoveActivity, onQuickAdd }: WeeklyScheduleProps) => {
   const getPracticaById = (id: string) => practicas.find(p => p.id === id);
   
   const getModuloColor = (moduloId: string) => {
@@ -158,8 +159,11 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                             )}
                           </div>
                         ) : (
-                          <div className="h-full flex items-center justify-center text-muted-foreground text-xs border-2 border-dashed border-muted rounded">
-                            Vacío
+                          <div 
+                            className="h-full flex items-center justify-center text-muted-foreground text-xs border-2 border-dashed border-muted rounded hover:border-primary hover:bg-accent/20 transition-colors cursor-pointer"
+                            onClick={() => onQuickAdd?.(dia, franja)}
+                          >
+                            <span className="text-xs">+ Añadir</span>
                           </div>
                         )}
                       </Card>
@@ -233,8 +237,11 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center text-muted-foreground text-sm py-4 border-2 border-dashed border-muted rounded">
-                        Sin actividades
+                      <div 
+                        className="text-center text-muted-foreground text-sm py-4 border-2 border-dashed border-muted rounded hover:border-primary hover:bg-accent/20 transition-colors cursor-pointer"
+                        onClick={() => onQuickAdd?.(dia, franja)}
+                      >
+                        <span className="text-sm">+ Añadir práctica</span>
                       </div>
                     )}
                   </div>

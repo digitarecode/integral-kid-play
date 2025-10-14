@@ -7,6 +7,7 @@ import { PracticaCard } from '@/components/PracticaCard';
 import { WeeklySchedule } from '@/components/WeeklySchedule';
 import { PracticaDialog } from '@/components/PracticaDialog';
 import { ScheduleDialog } from '@/components/ScheduleDialog';
+import { QuickAddDialog } from '@/components/QuickAddDialog';
 import { useMatrizData } from '@/hooks/useMatrizData';
 import { modulosConfig } from '@/data/matrizData';
 import { Practica } from '@/types/matriz';
@@ -39,9 +40,11 @@ const Index = () => {
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
   const [practicaDialogOpen, setPracticaDialogOpen] = useState(false);
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [quickAddDialogOpen, setQuickAddDialogOpen] = useState(false);
   const [editingPractica, setEditingPractica] = useState<Practica | null>(null);
   const [schedulingPractica, setSchedulingPractica] = useState<Practica | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
+  const [quickAddSlot, setQuickAddSlot] = useState<{ dia: string; franja: string } | null>(null);
 
   const getPracticasByModule = (moduleId: string) => {
     return practicas.filter(p => p.modulo === moduleId);
@@ -84,6 +87,23 @@ const Index = () => {
     addToSchedule(practicaId, dia, franja);
   };
 
+  const handleMultiScheduleAdd = (practicaId: string, dias: string[], franjas: string[]) => {
+    dias.forEach(dia => {
+      franjas.forEach(franja => {
+        addToSchedule(practicaId, dia, franja);
+      });
+    });
+    toast({
+      title: "✅ Añadido al horario",
+      description: `Práctica programada en ${dias.length} día(s) y ${franjas.length} horario(s)`,
+    });
+  };
+
+  const handleQuickAdd = (dia: string, franja: string) => {
+    setQuickAddSlot({ dia, franja });
+    setQuickAddDialogOpen(true);
+  };
+
   const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -116,10 +136,10 @@ const Index = () => {
             
             <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
               <Button
-                variant="outline"
+                variant={showSchedule ? "secondary" : "default"}
                 size="sm"
                 onClick={() => setShowSchedule(!showSchedule)}
-                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm flex-1 sm:flex-initial"
+                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm flex-1 sm:flex-initial transition-all hover:scale-105"
               >
                 <Calendar className="h-4 w-4 mr-1 sm:mr-2" />
                 <span className="truncate">{showSchedule ? 'Ver Módulos' : 'Mi Agenda'}</span>
@@ -179,6 +199,7 @@ const Index = () => {
             horarios={horarios}
             practicas={practicas}
             onRemoveFromSchedule={removeFromSchedule}
+            onQuickAdd={handleQuickAdd}
           />
         ) : selectedModule ? (
           /* Vista de prácticas de un módulo */
@@ -186,9 +207,9 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full sm:w-auto">
                 <Button 
-                  variant="outline" 
+                  variant="default"
                   onClick={handleBackToModules}
-                  className="min-h-[44px] px-4 self-start"
+                  className="min-h-[44px] px-4 self-start transition-all hover:scale-105"
                 >
                   ← Volver a módulos
                 </Button>
@@ -345,12 +366,23 @@ const Index = () => {
         }}
         practica={editingPractica}
         onSave={handleSavePractica}
+        currentModule={selectedModule || undefined}
       />
 
       <ScheduleDialog
         open={scheduleDialogOpen}
         onOpenChange={setScheduleDialogOpen}
         practica={schedulingPractica}
+        onAddToSchedule={handleScheduleAdd}
+        onAddToMultipleSchedules={handleMultiScheduleAdd}
+      />
+
+      <QuickAddDialog
+        open={quickAddDialogOpen}
+        onOpenChange={setQuickAddDialogOpen}
+        dia={quickAddSlot?.dia || ''}
+        franja={quickAddSlot?.franja || ''}
+        practicas={practicas}
         onAddToSchedule={handleScheduleAdd}
       />
     </div>
