@@ -79,7 +79,7 @@ export const PracticaDialog = ({ open, onOpenChange, practica, onSave, currentMo
 
   const iconos = [
     '🎯', '💪', '🧠', '✨', '🌙', '⚖️', '💖', '😊', '👫', '🏋️', 
-    '🏃', '🌬️', '🧘', '🍎', '🔍', '📚', '✏️', '🧩', '💡', '🧘‍♀️', 
+    '🏃', '🌬️', '🧘', '🍏', '🔍', '📚', '✏️', '🧩', '💡', '🧘‍♀️', 
     '🤔', '🙏', '💝', '🌳', '🎭', '💭', '🪞', '🎪', '🚲', '🛼', 
     '⚽', '🏀', '⚾', '🎮', '🛏️', '🧸', '🏔️', '🐶', '🐱', '🌈', 
     '🦋', '🌸', '🍎', '🥕'
@@ -160,12 +160,12 @@ export const PracticaDialog = ({ open, onOpenChange, practica, onSave, currentMo
             </Select>
           </div>
           
-          <div>
+            <div>
             <Label htmlFor="icono">Icono</Label>
             <div className="grid grid-cols-10 gap-2 mt-2">
-              {iconos.map(icono => (
+              {iconos.map((icono, idx) => (
                 <Button
-                  key={icono}
+                  key={`${icono}-${idx}`}
                   type="button"
                   variant={formData.icono === icono ? "default" : "outline"}
                   size="sm"
@@ -180,10 +180,14 @@ export const PracticaDialog = ({ open, onOpenChange, practica, onSave, currentMo
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>
-          <Button onClick={handleSave}>
+          <Button 
+            type="button" 
+            onClick={handleSave}
+            disabled={!formData.titulo.trim() || !formData.descripcion.trim()}
+          >
             {practica ? 'Guardar' : 'Crear'}
           </Button>
         </DialogFooter>

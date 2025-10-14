@@ -88,16 +88,24 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                   {diasSemana.map(dia => {
                     const horario = getHorarioForDayAndFranja(dia, franja);
                     const practicasEnHorario = horario ? horario.practicaIds.map(id => getPracticaById(id)).filter(Boolean) as Practica[] : [];
+                    const canAddMore = practicasEnHorario.length < 3;
                     
                     return (
-                      <Card key={`${dia}-${franja}`} className="p-1 lg:p-2 min-h-[100px] lg:min-h-[120px] relative">
+                      <Card 
+                        key={`${dia}-${franja}`} 
+                        className={cn(
+                          "p-1 lg:p-2 min-h-[100px] lg:min-h-[120px] relative",
+                          canAddMore && "cursor-pointer hover:shadow-md transition-shadow"
+                        )}
+                        onClick={canAddMore ? () => onQuickAdd?.(dia, franja) : undefined}
+                      >
                         {practicasEnHorario.length > 0 ? (
-                          <div className="space-y-1 lg:space-y-2 h-full">
+                          <div className="space-y-1 lg:space-y-2 h-full pointer-events-none">
                             {practicasEnHorario.map((practica, index) => (
                               <div
                                 key={`${practica.id}-${index}`}
                                 className={cn(
-                                  'rounded-lg p-2 lg:p-3 text-xs relative group border-2 transition-all hover:shadow-sm',
+                                  'rounded-lg p-2 lg:p-3 text-xs relative group border-2 transition-all hover:shadow-sm pointer-events-auto',
                                   // Aplicar colores consistentes por módulo
                                   practica.modulo === 'cuerpo' && 'bg-blue-50 border-blue-200 text-blue-900',
                                   practica.modulo === 'mente' && 'bg-green-50 border-green-200 text-green-900',
@@ -117,7 +125,10 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                                       size="sm"
                                       variant="ghost"
                                       className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-                                      onClick={() => onMoveActivity(horario!.id, practica.id, 'up')}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onMoveActivity(horario!.id, practica.id, 'up');
+                                      }}
                                     >
                                       <ChevronUp className="h-3 w-3" />
                                     </Button>
@@ -127,7 +138,10 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                                       size="sm"
                                       variant="ghost"
                                       className="h-5 w-5 p-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full"
-                                      onClick={() => onMoveActivity(horario!.id, practica.id, 'down')}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onMoveActivity(horario!.id, practica.id, 'down');
+                                      }}
                                     >
                                       <ChevronDown className="h-3 w-3" />
                                     </Button>
@@ -136,7 +150,10 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                                     size="sm"
                                     variant="ghost"
                                     className="h-5 w-5 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full"
-                                    onClick={() => onRemoveFromSchedule(horario!.id, practica.id)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onRemoveFromSchedule(horario!.id, practica.id);
+                                    }}
                                   >
                                     <X className="h-3 w-3" />
                                   </Button>
@@ -152,17 +169,14 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                                 </div>
                               </div>
                             ))}
-                            {practicasEnHorario.length < 3 && (
-                              <div className="text-xs text-muted-foreground text-center opacity-50 mt-1">
-                                +{3 - practicasEnHorario.length} más
+                            {canAddMore && (
+                              <div className="text-xs text-primary text-center font-medium mt-1 p-2 border-2 border-dashed border-primary/30 rounded hover:border-primary hover:bg-primary/5 transition-colors pointer-events-auto">
+                                + Añadir otra ({3 - practicasEnHorario.length} disponibles)
                               </div>
                             )}
                           </div>
                         ) : (
-                          <div 
-                            className="h-full flex items-center justify-center text-muted-foreground text-xs border-2 border-dashed border-muted rounded hover:border-primary hover:bg-accent/20 transition-colors cursor-pointer"
-                            onClick={() => onQuickAdd?.(dia, franja)}
-                          >
+                          <div className="h-full flex items-center justify-center text-muted-foreground text-xs border-2 border-dashed border-muted rounded hover:border-primary hover:bg-accent/20 transition-colors">
                             <span className="text-xs">+ Añadir</span>
                           </div>
                         )}
@@ -187,20 +201,28 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
               {franjasHorarias.map(franja => {
                 const horario = getHorarioForDayAndFranja(dia, franja);
                 const practicasEnHorario = horario ? horario.practicaIds.map(id => getPracticaById(id)).filter(Boolean) as Practica[] : [];
+                const canAddMore = practicasEnHorario.length < 3;
                 
                 return (
-                  <div key={`${dia}-${franja}`} className="border rounded-lg p-3">
+                  <div 
+                    key={`${dia}-${franja}`} 
+                    className={cn(
+                      "border rounded-lg p-3",
+                      canAddMore && "cursor-pointer hover:shadow-md transition-shadow"
+                    )}
+                    onClick={canAddMore ? () => onQuickAdd?.(dia, franja) : undefined}
+                  >
                     <div className={`text-sm font-medium mb-2 p-2 rounded text-center ${franjasColores[franja as keyof typeof franjasColores]}`}>
                       {franjasLabels[franja as keyof typeof franjasLabels]}
                     </div>
                     
                     {practicasEnHorario.length > 0 ? (
-                      <div className="space-y-2">
+                      <div className="space-y-2 pointer-events-none">
                         {practicasEnHorario.map((practica, index) => (
                           <div
                             key={`${practica.id}-${index}`}
                             className={cn(
-                              'rounded-lg p-3 text-sm relative group border-2 transition-all',
+                              'rounded-lg p-3 text-sm relative group border-2 transition-all pointer-events-auto',
                               // Touch-friendly sizing
                               'min-h-[60px] flex items-center',
                               // Aplicar colores consistentes por módulo
@@ -229,18 +251,23 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                               size="sm"
                               variant="ghost"
                               className="h-8 w-8 p-0 bg-red-500 hover:bg-red-600 text-white rounded-full ml-2"
-                              onClick={() => onRemoveFromSchedule(horario!.id, practica.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onRemoveFromSchedule(horario!.id, practica.id);
+                              }}
                             >
                               <X className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
+                        {canAddMore && (
+                          <div className="text-sm text-primary text-center font-medium p-3 border-2 border-dashed border-primary/30 rounded hover:border-primary hover:bg-primary/5 transition-colors pointer-events-auto">
+                            + Añadir otra ({3 - practicasEnHorario.length} disponibles)
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <div 
-                        className="text-center text-muted-foreground text-sm py-4 border-2 border-dashed border-muted rounded hover:border-primary hover:bg-accent/20 transition-colors cursor-pointer"
-                        onClick={() => onQuickAdd?.(dia, franja)}
-                      >
+                      <div className="text-center text-muted-foreground text-sm py-4 border-2 border-dashed border-muted rounded hover:border-primary hover:bg-accent/20 transition-colors">
                         <span className="text-sm">+ Añadir práctica</span>
                       </div>
                     )}
