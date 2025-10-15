@@ -199,7 +199,7 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
 
       {/* Vista Mobile - Horizontal Scroll */}
       <div className="md:hidden">
-        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-3 px-3">
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-2 px-2 scroll-smooth">
           {diasSemana.map(dia => (
             <Card key={dia} className="flex-shrink-0 w-[85vw] snap-center p-4">
               <h3 className="text-lg font-bold mb-3 text-center sticky top-0 bg-card z-10 pb-2">

@@ -69,15 +69,12 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
 
   const handlePresetChange = (preset: string) => {
     setMultiDayPreset(preset);
-    switch (preset) {
-      case 'everyday-same':
-        setSelectedDias(diasSemana);
-        setSelectedFranjas([]);
-        break;
-      case 'custom':
-        setSelectedDias([]);
-        setSelectedFranjas([]);
-        break;
+    if (preset === 'everyday-same') {
+      setSelectedDias(diasSemana);
+      setSelectedFranjas([]);
+    } else {
+      setSelectedDias([]);
+      setSelectedFranjas([]);
     }
   };
 
