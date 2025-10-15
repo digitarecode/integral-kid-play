@@ -12,9 +12,10 @@ interface WeeklyScheduleProps {
   onRemoveFromSchedule: (horarioId: string, practicaId?: string) => void;
   onMoveActivity?: (horarioId: string, practicaId: string, direction: 'up' | 'down') => void;
   onQuickAdd?: (dia: string, franja: string) => void;
+  onReschedule?: (practica: Practica, horarioId: string, dia: string, franja: string) => void;
 }
 
-export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMoveActivity, onQuickAdd }: WeeklyScheduleProps) => {
+export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMoveActivity, onQuickAdd, onReschedule }: WeeklyScheduleProps) => {
   const getPracticaById = (id: string) => practicas.find(p => p.id === id);
   
   const getModuloColor = (moduloId: string) => {
@@ -160,7 +161,13 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                                 </div>
                                 
                                 {/* Contenido de la tarjeta - sin truncar texto */}
-                                <div className="text-xs font-semibold mb-1 leading-tight">
+                                <div 
+                                  className="text-xs font-semibold mb-1 leading-tight cursor-pointer hover:opacity-80"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onReschedule?.(practica, horario!.id, dia, franja);
+                                  }}
+                                >
                                   <span className="mr-1">{practica.icono}</span>
                                   <span className="break-words">{practica.titulo}</span>
                                 </div>
@@ -190,13 +197,14 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
         </div>
       </div>
 
-      {/* Vista Mobile */}
-      <div className="md:hidden space-y-4">
-        {diasSemana.map(dia => (
-          <Card key={dia} className="p-4">
-            <h3 className="text-lg font-bold mb-3 text-center">
-              {dia.charAt(0).toUpperCase() + dia.slice(1)}
-            </h3>
+      {/* Vista Mobile - Horizontal Scroll */}
+      <div className="md:hidden">
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-3 px-3">
+          {diasSemana.map(dia => (
+            <Card key={dia} className="flex-shrink-0 w-[85vw] snap-center p-4">
+              <h3 className="text-lg font-bold mb-3 text-center sticky top-0 bg-card z-10 pb-2">
+                {dia.charAt(0).toUpperCase() + dia.slice(1)}
+              </h3>
             <div className="space-y-3">
               {franjasHorarias.map(franja => {
                 const horario = getHorarioForDayAndFranja(dia, franja);
@@ -236,8 +244,14 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                               practica.modulo === 'emociones' && 'bg-yellow-50 border-yellow-200 text-yellow-900',
                               practica.modulo === 'relaciones' && 'bg-cyan-50 border-cyan-200 text-cyan-900'
                             )}
-                          >
-                            <div className="flex-1">
+                           >
+                            <div 
+                              className="flex-1 cursor-pointer"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onReschedule?.(practica, horario!.id, dia, franja);
+                              }}
+                            >
                               <div className="font-semibold mb-1 leading-tight">
                                 <span className="mr-2 text-lg">{practica.icono}</span>
                                 <span className="break-words">{practica.titulo}</span>
@@ -274,9 +288,23 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                   </div>
                 );
               })}
-            </div>
-          </Card>
-        ))}
+              </div>
+            </Card>
+          ))}
+        </div>
+        
+        {/* Indicador de scroll */}
+        <div className="flex justify-center gap-2 mt-2">
+          {diasSemana.map((dia, index) => (
+            <div 
+              key={dia} 
+              className="h-1.5 w-8 rounded-full bg-muted"
+              style={{
+                background: `hsl(var(--primary) / ${index === 0 ? '1' : '0.3'})`
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

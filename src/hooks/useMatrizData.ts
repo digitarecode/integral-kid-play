@@ -155,13 +155,11 @@ export const useMatrizData = () => {
   };
 
   const resetToDefault = () => {
-    setPracticas(practicasIniciales);
     setHorarios([]);
-    localStorage.removeItem(STORAGE_KEYS.PRACTICAS);
-    localStorage.removeItem(STORAGE_KEYS.HORARIOS);
+    localStorage.setItem(STORAGE_KEYS.HORARIOS, JSON.stringify([]));
     toast({
-      title: "Datos restablecidos",
-      description: "Se ha vuelto a la matriz original."
+      title: "Agenda limpiada",
+      description: "Se ha vaciado la agenda semanal. Tus prácticas se mantienen intactas."
     });
   };
 
@@ -232,6 +230,69 @@ export const useMatrizData = () => {
     }));
   };
 
+  const reschedulePractica = (oldHorarioId: string, practicaId: string, newDia: string, newFranja: string) => {
+    // Remove from old schedule
+    const oldHorario = horarios.find(h => h.id === oldHorarioId);
+    if (!oldHorario) return;
+
+    const updatedOldPracticaIds = oldHorario.practicaIds.filter(id => id !== practicaId);
+    
+    // Check if new slot already exists
+    const existingNewHorario = horarios.find(h => h.dia === newDia && h.franja === newFranja);
+    
+    if (existingNewHorario) {
+      // Verify limit
+      if (existingNewHorario.practicaIds.length >= 3) {
+        toast({
+          title: "¡Límite alcanzado!",
+          description: "El nuevo horario ya tiene 3 actividades.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      // Add to existing slot
+      setHorarios(prev => prev.map(h => {
+        if (h.id === oldHorarioId) {
+          return updatedOldPracticaIds.length > 0 
+            ? { ...h, practicaIds: updatedOldPracticaIds }
+            : null;
+        }
+        if (h.id === existingNewHorario.id) {
+          return { ...h, practicaIds: [...h.practicaIds, practicaId] };
+        }
+        return h;
+      }).filter(Boolean) as HorarioEntry[]);
+    } else {
+      // Create new slot
+      const newEntry: HorarioEntry = {
+        id: `horario-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        practicaIds: [practicaId],
+        dia: newDia,
+        franja: newFranja
+      };
+      
+      setHorarios(prev => {
+        const filtered = prev.map(h => {
+          if (h.id === oldHorarioId) {
+            return updatedOldPracticaIds.length > 0 
+              ? { ...h, practicaIds: updatedOldPracticaIds }
+              : null;
+          }
+          return h;
+        }).filter(Boolean) as HorarioEntry[];
+        
+        return [...filtered, newEntry];
+      });
+    }
+
+    const practica = practicas.find(p => p.id === practicaId);
+    toast({
+      title: "Práctica reprogramada",
+      description: `"${practica?.titulo}" movido a ${newDia} en la ${newFranja}.`
+    });
+  };
+
   return {
     practicas,
     horarios,
@@ -241,6 +302,7 @@ export const useMatrizData = () => {
     addToSchedule,
     removeFromSchedule,
     moveActivityInSchedule,
+    reschedulePractica,
     resetToDefault,
     exportData,
     importData

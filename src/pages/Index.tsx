@@ -8,6 +8,7 @@ import { WeeklySchedule } from '@/components/WeeklySchedule';
 import { PracticaDialog } from '@/components/PracticaDialog';
 import { ScheduleDialog } from '@/components/ScheduleDialog';
 import { QuickAddDialog } from '@/components/QuickAddDialog';
+import { RescheduleDialog } from '@/components/RescheduleDialog';
 import { useMatrizData } from '@/hooks/useMatrizData';
 import { modulosConfig } from '@/data/matrizData';
 import { Practica } from '@/types/matriz';
@@ -21,6 +22,7 @@ import {
   Star
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const Index = () => {
   const {
@@ -32,6 +34,7 @@ const Index = () => {
     addToSchedule,
     removeFromSchedule,
     moveActivityInSchedule,
+    reschedulePractica,
     resetToDefault,
     exportData,
     importData
@@ -45,6 +48,13 @@ const Index = () => {
   const [schedulingPractica, setSchedulingPractica] = useState<Practica | null>(null);
   const [showSchedule, setShowSchedule] = useState(false);
   const [quickAddSlot, setQuickAddSlot] = useState<{ dia: string; franja: string } | null>(null);
+  const [rescheduleDialogOpen, setRescheduleDialogOpen] = useState(false);
+  const [reschedulingData, setReschedulingData] = useState<{
+    practica: Practica;
+    horarioId: string;
+    dia: string;
+    franja: string;
+  } | null>(null);
 
   const getPracticasByModule = (moduleId: string) => {
     return practicas.filter(p => p.modulo === moduleId);
@@ -104,6 +114,15 @@ const Index = () => {
     setQuickAddDialogOpen(true);
   };
 
+  const handleRescheduleClick = (practica: Practica, horarioId: string, dia: string, franja: string) => {
+    setReschedulingData({ practica, horarioId, dia, franja });
+    setRescheduleDialogOpen(true);
+  };
+
+  const handleReschedule = (horarioId: string, practicaId: string, newDia: string, newFranja: string) => {
+    reschedulePractica(horarioId, practicaId, newDia, newFranja);
+  };
+
   const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -139,7 +158,12 @@ const Index = () => {
                 variant={showSchedule ? "secondary" : "default"}
                 size="sm"
                 onClick={() => setShowSchedule(!showSchedule)}
-                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm flex-1 sm:flex-initial transition-all hover:scale-105"
+                className={cn(
+                  "min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm flex-1 sm:flex-initial transition-all",
+                  showSchedule 
+                    ? "bg-info text-info-foreground hover:bg-info/90 hover:scale-105" 
+                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105"
+                )}
               >
                 <Calendar className="h-4 w-4 mr-1 sm:mr-2" />
                 <span className="truncate">{showSchedule ? 'Ver Módulos' : 'Mi Agenda'}</span>
@@ -177,16 +201,18 @@ const Index = () => {
                 />
               </label>
 
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={resetToDefault}
-                className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
-              >
-                <RotateCcw className="h-4 w-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Restablecer</span>
-                <span className="sm:hidden">Reset</span>
-              </Button>
+              {showSchedule && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={resetToDefault}
+                  className="min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm hover:bg-destructive hover:text-destructive-foreground transition-all"
+                >
+                  <RotateCcw className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">Limpiar</span>
+                  <span className="sm:hidden">Limpiar</span>
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -199,7 +225,9 @@ const Index = () => {
             horarios={horarios}
             practicas={practicas}
             onRemoveFromSchedule={removeFromSchedule}
+            onMoveActivity={moveActivityInSchedule}
             onQuickAdd={handleQuickAdd}
+            onReschedule={handleRescheduleClick}
           />
         ) : selectedModule ? (
           /* Vista de prácticas de un módulo */
@@ -209,7 +237,7 @@ const Index = () => {
                 <Button 
                   variant="default"
                   onClick={handleBackToModules}
-                  className="min-h-[44px] px-4 self-start transition-all hover:scale-105"
+                  className="min-h-[44px] px-4 self-start transition-all bg-accent text-accent-foreground hover:bg-accent/90 hover:scale-105"
                 >
                   ← Volver a módulos
                 </Button>
@@ -384,6 +412,16 @@ const Index = () => {
         franja={quickAddSlot?.franja || ''}
         practicas={practicas}
         onAddToSchedule={handleScheduleAdd}
+      />
+
+      <RescheduleDialog
+        open={rescheduleDialogOpen}
+        onOpenChange={setRescheduleDialogOpen}
+        practica={reschedulingData?.practica || null}
+        currentDia={reschedulingData?.dia || ''}
+        currentFranja={reschedulingData?.franja || ''}
+        currentHorarioId={reschedulingData?.horarioId || ''}
+        onReschedule={handleReschedule}
       />
     </div>
   );

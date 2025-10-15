@@ -74,14 +74,6 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
         setSelectedDias(diasSemana);
         setSelectedFranjas([]);
         break;
-      case 'everyday-custom':
-        setSelectedDias(diasSemana);
-        setSelectedFranjas([]);
-        break;
-      case 'specific-same':
-        setSelectedDias([]);
-        setSelectedFranjas([]);
-        break;
       case 'custom':
         setSelectedDias([]);
         setSelectedFranjas([]);
@@ -200,8 +192,6 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="everyday-same">Todos los días (mismo horario)</SelectItem>
-                      <SelectItem value="everyday-custom">Todos los días (horarios variados)</SelectItem>
-                      <SelectItem value="specific-same">Días específicos (mismo horario)</SelectItem>
                       <SelectItem value="custom">Personalizado</SelectItem>
                     </SelectContent>
                   </Select>
