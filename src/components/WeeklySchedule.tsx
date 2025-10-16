@@ -186,18 +186,20 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                                 </div>
                                 
                                 {/* Contenido de la tarjeta - sin truncar texto */}
-                                <div 
-                                  className="text-xs font-semibold mb-1 leading-tight cursor-pointer hover:opacity-80"
+                                <div
+                                  className="cursor-pointer hover:opacity-80"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     onReschedule?.(practica, horario!.id, dia, franja);
                                   }}
                                 >
-                                  <span className="mr-1">{practica.icono}</span>
-                                  <span className="break-words">{practica.titulo}</span>
-                                </div>
-                                <div className="text-xs opacity-75 font-medium">
-                                  {practica.duracion} min
+                                  <div className="text-xs font-semibold mb-1 leading-tight">
+                                    <span className="mr-1">{practica.icono}</span>
+                                    <span className="break-words">{practica.titulo}</span>
+                                  </div>
+                                  <div className="text-xs opacity-75 font-medium">
+                                    {practica.duracion} min
+                                  </div>
                                 </div>
                               </div>
                             ))}

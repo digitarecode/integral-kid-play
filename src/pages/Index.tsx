@@ -140,7 +140,22 @@ const Index = () => {
   // Android back button navigation handler
   useEffect(() => {
     const handleBackButton = (event: PopStateEvent) => {
-      if (showSchedule || selectedModule) {
+      // Check if any dialog is open - close it first
+      const isAnyDialogOpen = practicaDialogOpen || scheduleDialogOpen || quickAddDialogOpen || rescheduleDialogOpen;
+      
+      if (isAnyDialogOpen) {
+        event.preventDefault();
+        // Close all dialogs
+        setPracticaDialogOpen(false);
+        setScheduleDialogOpen(false);
+        setQuickAddDialogOpen(false);
+        setRescheduleDialogOpen(false);
+        setEditingPractica(null);
+        setSchedulingPractica(null);
+        setQuickAddSlot(null);
+        setReschedulingData(null);
+        window.history.pushState(null, '', window.location.pathname);
+      } else if (showSchedule || selectedModule) {
         event.preventDefault();
         if (selectedModule) {
           setSelectedModule(null);
@@ -158,7 +173,7 @@ const Index = () => {
     return () => {
       window.removeEventListener('popstate', handleBackButton);
     };
-  }, [showSchedule, selectedModule]);
+  }, [showSchedule, selectedModule, practicaDialogOpen, scheduleDialogOpen, quickAddDialogOpen, rescheduleDialogOpen]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -182,9 +197,9 @@ const Index = () => {
                 size="sm"
                 onClick={() => setShowSchedule(!showSchedule)}
                 className={cn(
-                  "min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm flex-1 sm:flex-initial transition-all",
+                  "min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm flex-1 sm:flex-initial transition-all font-semibold rounded-lg shadow-sm",
                   showSchedule 
-                    ? "bg-info text-info-foreground hover:bg-info/90 hover:scale-105" 
+                    ? "bg-[#FFB74D] text-gray-900 hover:bg-[#FB923C] hover:shadow-md hover:scale-105" 
                     : "bg-primary text-primary-foreground hover:bg-primary/90 hover:scale-105"
                 )}
               >
