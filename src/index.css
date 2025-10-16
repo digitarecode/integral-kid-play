@@ -91,6 +91,25 @@ Colores vibrantes y amigables siguiendo la metodología de Ken Wilber
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Color accents for days of the week */
+    --day-lunes: 0 79% 95%;
+    --day-martes: 45 100% 94%;
+    --day-miercoles: 199 89% 94%;
+    --day-jueves: 270 100% 95%;
+    --day-viernes: 142 76% 94%;
+    --day-sabado: 330 100% 95%;
+    --day-domingo: 39 100% 94%;
+    
+    /* Color accents for time slots */
+    --time-manana: 39 100% 96%;
+    --time-media-manana: 45 100% 96%;
+    --time-tarde: 45 93% 94%;
+    --time-noche: 262 100% 96%;
+    
+    /* Info accent for toggle button */
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
   }
 
   .dark {
@@ -129,6 +148,25 @@ Colores vibrantes y amigables siguiendo la metodología de Ken Wilber
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Color accents for days (dark mode - slightly darker) */
+    --day-lunes: 0 70% 20%;
+    --day-martes: 45 80% 20%;
+    --day-miercoles: 199 70% 20%;
+    --day-jueves: 270 70% 22%;
+    --day-viernes: 142 60% 20%;
+    --day-sabado: 330 70% 22%;
+    --day-domingo: 39 80% 20%;
+    
+    /* Color accents for time slots (dark mode) */
+    --time-manana: 39 80% 18%;
+    --time-media-manana: 45 80% 18%;
+    --time-tarde: 45 70% 18%;
+    --time-noche: 262 70% 20%;
+    
+    /* Info accent for toggle button */
+    --info: 199 89% 38%;
+    --info-foreground: 0 0% 100%;
   }
 }
 

@@ -103,6 +103,28 @@ export default {
           light: "hsl(var(--relaciones-light))",
           foreground: "hsl(var(--relaciones-foreground))",
         },
+        // Day accents
+        day: {
+          lunes: "hsl(var(--day-lunes))",
+          martes: "hsl(var(--day-martes))",
+          miercoles: "hsl(var(--day-miercoles))",
+          jueves: "hsl(var(--day-jueves))",
+          viernes: "hsl(var(--day-viernes))",
+          sabado: "hsl(var(--day-sabado))",
+          domingo: "hsl(var(--day-domingo))",
+        },
+        // Time slot accents
+        time: {
+          manana: "hsl(var(--time-manana))",
+          mediaManana: "hsl(var(--time-media-manana))",
+          tarde: "hsl(var(--time-tarde))",
+          noche: "hsl(var(--time-noche))",
+        },
+        // Info color for toggle
+        info: {
+          DEFAULT: "hsl(var(--info))",
+          foreground: "hsl(var(--info-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

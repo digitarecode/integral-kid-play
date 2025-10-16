@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -136,6 +136,29 @@ const Index = () => {
 
   const modulosPrincipales = modulosConfig.filter(m => m.esPrincipal);
   const modulosAuxiliares = modulosConfig.filter(m => !m.esPrincipal);
+
+  // Android back button navigation handler
+  useEffect(() => {
+    const handleBackButton = (event: PopStateEvent) => {
+      if (showSchedule || selectedModule) {
+        event.preventDefault();
+        if (selectedModule) {
+          setSelectedModule(null);
+        } else if (showSchedule) {
+          setShowSchedule(false);
+        }
+        window.history.pushState(null, '', window.location.pathname);
+      }
+    };
+
+    // Push initial state
+    window.history.pushState(null, '', window.location.pathname);
+    window.addEventListener('popstate', handleBackButton);
+
+    return () => {
+      window.removeEventListener('popstate', handleBackButton);
+    };
+  }, [showSchedule, selectedModule]);
 
   return (
     <div className="min-h-screen bg-background">

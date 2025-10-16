@@ -27,6 +27,25 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
     return horarios.find(h => h.dia === dia && h.franja === franja);
   };
 
+  // Day accent colors mapping
+  const dayAccents: Record<string, string> = {
+    'lunes': 'bg-day-lunes',
+    'martes': 'bg-day-martes',
+    'miercoles': 'bg-day-miercoles',
+    'jueves': 'bg-day-jueves',
+    'viernes': 'bg-day-viernes',
+    'sabado': 'bg-day-sabado',
+    'domingo': 'bg-day-domingo',
+  };
+  
+  // Time slot accent colors mapping  
+  const timeAccents: Record<string, string> = {
+    'mañana': 'bg-time-manana',
+    'media-mañana': 'bg-time-mediaManana',
+    'tarde': 'bg-time-tarde',
+    'noche': 'bg-time-noche',
+  };
+
   const franjasLabels = {
     mañana: '🌅 Mañana',
     'media-mañana': '☀️ Media Mañana',
@@ -67,7 +86,10 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
               
               {/* Headers de días */}
               {diasSemana.map(dia => (
-                <div key={dia} className="p-2 lg:p-3 text-center text-xs lg:text-sm font-semibold bg-muted rounded-lg">
+                <div key={dia} className={cn(
+                  "p-2 lg:p-3 text-center text-xs lg:text-sm font-semibold rounded-lg",
+                  dayAccents[dia]
+                )}>
                   {diasLabels[dia as keyof typeof diasLabels]}
                 </div>
               ))}
@@ -76,7 +98,10 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
               {franjasHorarias.map(franja => (
                 <React.Fragment key={franja}>
                   {/* Label de franja */}
-                  <div className={`p-2 lg:p-3 text-xs font-medium rounded-lg flex items-center justify-center text-center border ${franjasColores[franja as keyof typeof franjasColores]}`}>
+                  <div className={cn(
+                    "p-2 lg:p-3 text-xs font-medium rounded-lg flex items-center justify-center text-center",
+                    timeAccents[franja]
+                  )}>
                     <span className="hidden lg:inline">{franjasLabels[franja as keyof typeof franjasLabels]}</span>
                     <span className="lg:hidden text-center">
                       {franja === 'mañana' ? '🌅' : 
@@ -202,7 +227,10 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
         <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-2 px-2 scroll-smooth">
           {diasSemana.map(dia => (
             <Card key={dia} className="flex-shrink-0 w-[85vw] snap-center p-4">
-              <h3 className="text-lg font-bold mb-3 text-center sticky top-0 bg-card z-10 pb-2">
+              <h3 className={cn(
+                "text-lg font-bold mb-3 text-center sticky top-0 z-10 pb-2 rounded-md py-2",
+                dayAccents[dia]
+              )}>
                 {dia.charAt(0).toUpperCase() + dia.slice(1)}
               </h3>
             <div className="space-y-3">
@@ -220,7 +248,10 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                     )}
                     onClick={canAddMore ? () => onQuickAdd?.(dia, franja) : undefined}
                   >
-                    <div className={`text-sm font-medium mb-2 p-2 rounded text-center ${franjasColores[franja as keyof typeof franjasColores]}`}>
+                    <div className={cn(
+                      "text-sm font-medium mb-2 p-2 rounded text-center",
+                      timeAccents[franja]
+                    )}>
                       {franjasLabels[franja as keyof typeof franjasLabels]}
                     </div>
                     
