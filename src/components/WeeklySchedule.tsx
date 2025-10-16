@@ -53,11 +53,32 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
     noche: '🌙 Noche'
   };
 
-  const franjasColores = {
-    mañana: 'bg-orange-100 text-orange-800 border-orange-200',
-    'media-mañana': 'bg-yellow-100 text-yellow-800 border-yellow-200',
-    tarde: 'bg-amber-100 text-amber-800 border-amber-200',
-    noche: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+  // Enhanced time block colors with stronger visual distinction
+  const timeBlockStyles = {
+    mañana: {
+      bg: 'bg-orange-50',
+      border: 'border-orange-300',
+      text: 'text-orange-900',
+      header: 'bg-orange-100 text-orange-900 border-orange-300'
+    },
+    'media-mañana': {
+      bg: 'bg-yellow-50',
+      border: 'border-yellow-300',
+      text: 'text-yellow-900',
+      header: 'bg-yellow-100 text-yellow-900 border-yellow-300'
+    },
+    tarde: {
+      bg: 'bg-amber-50',
+      border: 'border-amber-300',
+      text: 'text-amber-900',
+      header: 'bg-amber-100 text-amber-900 border-amber-300'
+    },
+    noche: {
+      bg: 'bg-indigo-50',
+      border: 'border-indigo-300',
+      text: 'text-indigo-900',
+      header: 'bg-indigo-100 text-indigo-900 border-indigo-300'
+    }
   };
 
   const diasLabels = {
@@ -99,11 +120,11 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                 <React.Fragment key={franja}>
                   {/* Label de franja */}
                   <div className={cn(
-                    "p-2 lg:p-3 text-xs font-medium rounded-lg flex items-center justify-center text-center",
-                    timeAccents[franja]
+                    "p-2 lg:p-3 text-xs lg:text-sm font-bold rounded-lg flex items-center justify-center text-center border-2",
+                    timeBlockStyles[franja as keyof typeof timeBlockStyles].header
                   )}>
                     <span className="hidden lg:inline">{franjasLabels[franja as keyof typeof franjasLabels]}</span>
-                    <span className="lg:hidden text-center">
+                    <span className="lg:hidden text-center text-base">
                       {franja === 'mañana' ? '🌅' : 
                        franja === 'media-mañana' ? '☀️' : 
                        franja === 'tarde' ? '🌞' : '🌙'}
@@ -120,7 +141,9 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                       <Card 
                         key={`${dia}-${franja}`} 
                         className={cn(
-                          "p-1 lg:p-2 min-h-[100px] lg:min-h-[120px] relative",
+                          "p-1 lg:p-2 min-h-[100px] lg:min-h-[120px] relative border-2",
+                          timeBlockStyles[franja as keyof typeof timeBlockStyles].bg,
+                          timeBlockStyles[franja as keyof typeof timeBlockStyles].border,
                           canAddMore && "cursor-pointer hover:shadow-md transition-shadow"
                         )}
                         onClick={canAddMore ? () => onQuickAdd?.(dia, franja) : undefined}
@@ -245,14 +268,16 @@ export const WeeklySchedule = ({ horarios, practicas, onRemoveFromSchedule, onMo
                   <div 
                     key={`${dia}-${franja}`} 
                     className={cn(
-                      "border rounded-lg p-3",
+                      "border-2 rounded-xl p-3 mb-3",
+                      timeBlockStyles[franja as keyof typeof timeBlockStyles].bg,
+                      timeBlockStyles[franja as keyof typeof timeBlockStyles].border,
                       canAddMore && "cursor-pointer hover:shadow-md transition-shadow"
                     )}
                     onClick={canAddMore ? () => onQuickAdd?.(dia, franja) : undefined}
                   >
                     <div className={cn(
-                      "text-sm font-medium mb-2 p-2 rounded text-center",
-                      timeAccents[franja]
+                      "text-base font-bold mb-3 p-2 rounded-lg text-center border-2",
+                      timeBlockStyles[franja as keyof typeof timeBlockStyles].header
                     )}>
                       {franjasLabels[franja as keyof typeof franjasLabels]}
                     </div>
