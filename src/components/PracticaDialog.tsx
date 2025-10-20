@@ -32,7 +32,7 @@ export const PracticaDialog = ({ open, onOpenChange, practica, onSave, currentMo
   const [formData, setFormData] = useState<{
     titulo: string;
     descripcion: string;
-    duracion: number;
+    duracion: number | string;
     nivel: 'facil' | 'intermedio' | 'avanzado';
     modulo: string;
     icono: string;
@@ -71,6 +71,7 @@ export const PracticaDialog = ({ open, onOpenChange, practica, onSave, currentMo
     if (formData.titulo.trim() && formData.descripcion.trim()) {
       onSave({
         ...formData,
+        duracion: typeof formData.duracion === 'string' ? parseInt(formData.duracion) || 15 : formData.duracion,
         ...(practica ? { id: practica.id } : {})
       });
       onOpenChange(false);
@@ -124,8 +125,9 @@ export const PracticaDialog = ({ open, onOpenChange, practica, onSave, currentMo
                 type="number"
                 min="1"
                 max="120"
+                placeholder="Ej: 15"
                 value={formData.duracion}
-                onChange={(e) => setFormData(prev => ({ ...prev, duracion: parseInt(e.target.value) || 15 }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, duracion: e.target.value === '' ? '' : parseInt(e.target.value) }))}
               />
             </div>
             
