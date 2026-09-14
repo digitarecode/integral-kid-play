@@ -14,7 +14,122 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      notification_deliveries: {
+        Row: {
+          error_message: string | null
+          id: string
+          reminder_id: string
+          scheduled_local_date: string
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          reminder_id: string
+          scheduled_local_date: string
+          sent_at?: string
+          status?: string
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          reminder_id?: string
+          scheduled_local_date?: string
+          sent_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_reminder_id_fkey"
+            columns: ["reminder_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_reminders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          active: boolean
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scheduled_reminders: {
+        Row: {
+          activity_title: string
+          created_at: string
+          day_of_week: number
+          enabled: boolean
+          id: string
+          local_time: string
+          minutes_before: number
+          module_id: string
+          occurrence_id: string
+          practica_id: string
+          timezone: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_title: string
+          created_at?: string
+          day_of_week: number
+          enabled?: boolean
+          id?: string
+          local_time: string
+          minutes_before?: number
+          module_id: string
+          occurrence_id: string
+          practica_id: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_title?: string
+          created_at?: string
+          day_of_week?: number
+          enabled?: boolean
+          id?: string
+          local_time?: string
+          minutes_before?: number
+          module_id?: string
+          occurrence_id?: string
+          practica_id?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
