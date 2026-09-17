@@ -1,174 +1,213 @@
-import { useState, useEffect } from 'react';
-import { Practica, HorarioEntry } from '@/types/matriz';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AgendaItem, HorarioEntry, Practica } from '@/types/matriz';
 import { practicasIniciales } from '@/data/matrizData';
 import { toast } from '@/hooks/use-toast';
+import {
+  DatosAlta,
+  actualizarItem,
+  anadirItem,
+  anadirItemsMultiples,
+  buscarItem,
+  construirExportacion,
+  copiarItemADias,
+  eliminarCelda,
+  eliminarItem,
+  eliminarPracticaDeAgenda,
+  leerImportacion,
+  migrarHorarios,
+  moverItem,
+  moverItemACelda,
+  recopilarRecordatorios,
+} from '@/lib/agenda';
+import { MENSAJES } from '@/lib/mensajesRecordatorio';
+import { sincronizarRecordatorios } from '@/lib/push';
 
 const STORAGE_KEYS = {
   PRACTICAS: 'matriz-practicas',
-  HORARIOS: 'matriz-horarios'
+  HORARIOS: 'matriz-horarios',
 };
 
 export const useMatrizData = () => {
   const [practicas, setPracticas] = useState<Practica[]>([]);
   const [horarios, setHorarios] = useState<HorarioEntry[]>([]);
+  const [cargado, setCargado] = useState(false);
+  const ultimaSync = useRef<string>('');
 
-  // Cargar datos del localStorage al inicio
+  // Cargar y migrar datos guardados en este dispositivo
   useEffect(() => {
-    const storedPracticas = localStorage.getItem(STORAGE_KEYS.PRACTICAS);
-    const storedHorarios = localStorage.getItem(STORAGE_KEYS.HORARIOS);
-
-    if (storedPracticas) {
-      setPracticas(JSON.parse(storedPracticas));
-    } else {
+    try {
+      const storedPracticas = localStorage.getItem(STORAGE_KEYS.PRACTICAS);
+      setPracticas(storedPracticas ? JSON.parse(storedPracticas) : practicasIniciales);
+    } catch {
       setPracticas(practicasIniciales);
     }
 
-    if (storedHorarios) {
-      const parsedHorarios = JSON.parse(storedHorarios);
-      // Migrar datos antiguos al nuevo formato
-      const migratedHorarios = parsedHorarios.map((h: any) => {
-        if (h.practicaId && !h.practicaIds) {
-          return { ...h, practicaIds: [h.practicaId] };
-        }
-        return h;
-      });
-      setHorarios(migratedHorarios);
+    try {
+      const storedHorarios = localStorage.getItem(STORAGE_KEYS.HORARIOS);
+      setHorarios(storedHorarios ? migrarHorarios(JSON.parse(storedHorarios)) : []);
+    } catch {
+      setHorarios([]);
     }
+
+    setCargado(true);
   }, []);
 
-  // Guardar prácticas en localStorage cuando cambien
+  // Persistencia local (sólo después de hidratar, para no borrar datos)
   useEffect(() => {
-    if (practicas.length > 0) {
-      localStorage.setItem(STORAGE_KEYS.PRACTICAS, JSON.stringify(practicas));
-    }
-  }, [practicas]);
+    if (!cargado) return;
+    localStorage.setItem(STORAGE_KEYS.PRACTICAS, JSON.stringify(practicas));
+  }, [practicas, cargado]);
 
-  // Guardar horarios en localStorage cuando cambien
   useEffect(() => {
+    if (!cargado) return;
     localStorage.setItem(STORAGE_KEYS.HORARIOS, JSON.stringify(horarios));
-  }, [horarios]);
+  }, [horarios, cargado]);
+
+  // Sincronizar recordatorios (se reintenta solo cuando vuelve la conexión)
+  useEffect(() => {
+    if (!cargado) return;
+    const recordatorios = recopilarRecordatorios(horarios, practicas);
+    const huella = JSON.stringify(recordatorios);
+    if (huella === ultimaSync.current) return;
+    ultimaSync.current = huella;
+    void sincronizarRecordatorios(recordatorios);
+  }, [horarios, practicas, cargado]);
+
+  const avisoLimite = (motivo?: 'limite' | 'duplicado') => {
+    toast({
+      title: motivo === 'duplicado' ? 'Ya está programada' : '¡Límite alcanzado!',
+      description: motivo === 'duplicado' ? MENSAJES.duplicado : MENSAJES.limiteCelda,
+      variant: 'destructive',
+    });
+  };
 
   const addPractica = (practica: Omit<Practica, 'id'>) => {
     const newPractica: Practica = {
       ...practica,
-      id: `custom-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      id: `custom-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
     };
     setPracticas(prev => [...prev, newPractica]);
-    toast({
-      title: "Práctica añadida",
-      description: `"${practica.titulo}" se ha añadido correctamente.`
-    });
+    toast({ title: 'Práctica añadida', description: `"${practica.titulo}" se ha añadido correctamente.` });
   };
 
   const updatePractica = (id: string, practica: Omit<Practica, 'id'>) => {
-    setPracticas(prev => prev.map(p => p.id === id ? { ...practica, id } : p));
-    toast({
-      title: "Práctica actualizada",
-      description: `"${practica.titulo}" se ha actualizado correctamente.`
-    });
+    setPracticas(prev => prev.map(p => (p.id === id ? { ...practica, id } : p)));
+    toast({ title: 'Práctica actualizada', description: `"${practica.titulo}" se ha actualizado.` });
   };
 
   const deletePractica = (id: string) => {
     const practica = practicas.find(p => p.id === id);
     setPracticas(prev => prev.filter(p => p.id !== id));
-    // Eliminar también de los horarios
-    setHorarios(prev => prev.map(h => ({
-      ...h,
-      practicaIds: h.practicaIds.filter(pId => pId !== id)
-    })).filter(h => h.practicaIds.length > 0));
-    toast({
-      title: "Práctica eliminada",
-      description: `"${practica?.titulo}" se ha eliminado correctamente.`
-    });
+    setHorarios(prev => eliminarPracticaDeAgenda(prev, id));
+    toast({ title: 'Práctica eliminada', description: `"${practica?.titulo}" se ha eliminado.` });
   };
 
-  const addToSchedule = (practicaId: string, dia: string, franja: string) => {
-    // Buscar entrada existente para ese día y franja
-    const existingEntry = horarios.find(h => h.dia === dia && h.franja === franja);
-    
-    if (existingEntry) {
-      // Verificar si ya tiene 3 actividades
-      if (existingEntry.practicaIds.length >= 3) {
-        toast({
-          title: "¡Límite alcanzado!",
-          description: "Solo puedes elegir hasta 3 actividades en este horario.",
-          variant: "destructive"
-        });
-        return;
+  /** Añade una ocurrencia con hora y recordatorio propios. */
+  const addToSchedule = useCallback((datos: DatosAlta) => {
+    setHorarios(prev => {
+      const resultado = anadirItem(prev, datos);
+      if (!resultado.ok) {
+        avisoLimite(resultado.motivo);
+        return prev;
       }
-      
-      // Verificar si la práctica ya está asignada
-      if (existingEntry.practicaIds.includes(practicaId)) {
-        toast({
-          title: "Ya programada",
-          description: "Esta práctica ya está en este horario.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Añadir la práctica a la entrada existente
-      setHorarios(prev => prev.map(h => 
-        h.id === existingEntry.id 
-          ? { ...h, practicaIds: [...h.practicaIds, practicaId] }
-          : h
-      ));
-    } else {
-      // Crear nueva entrada
-      const newEntry: HorarioEntry = {
-        id: `horario-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        practicaIds: [practicaId],
-        dia,
-        franja
-      };
-      setHorarios(prev => [...prev, newEntry]);
-    }
-    
-    const practica = practicas.find(p => p.id === practicaId);
-    toast({
-      title: "Añadido al horario",
-      description: `"${practica?.titulo}" programado para ${dia} en la ${franja}.`
+      return resultado.horarios;
     });
-  };
+  }, []);
 
-  const removeFromSchedule = (horarioId: string, practicaId?: string) => {
-    if (practicaId) {
-      // Remover práctica específica de una entrada
-      setHorarios(prev => prev.map(h => {
-        if (h.id === horarioId) {
-          const newPracticaIds = h.practicaIds.filter(id => id !== practicaId);
-          return newPracticaIds.length > 0 
-            ? { ...h, practicaIds: newPracticaIds }
-            : null;
+  const addToMultipleSchedules = useCallback(
+    (
+      practicaId: string,
+      dias: string[],
+      franjas: string[],
+      opciones: { hora?: string | null; recordatorio?: boolean; minutosAntes?: number } = {},
+    ) => {
+      setHorarios(prev => {
+        const { horarios: siguientes, anadidos, omitidos } = anadirItemsMultiples(
+          prev,
+          practicaId,
+          dias,
+          franjas,
+          opciones,
+        );
+        if (anadidos === 0) {
+          avisoLimite(omitidos > 0 ? 'limite' : undefined);
+          return prev;
         }
-        return h;
-      }).filter(Boolean) as HorarioEntry[]);
-    } else {
-      // Remover toda la entrada
-      setHorarios(prev => prev.filter(h => h.id !== horarioId));
-    }
-    
-    toast({
-      title: "Eliminado del horario",
-      description: "La práctica se ha eliminado del horario."
+        toast({
+          title: '✅ Añadido a la agenda',
+          description:
+            omitidos > 0
+              ? `${anadidos} programaciones creadas. ${omitidos} no cupieron.`
+              : `${anadidos} programación(es) creada(s).`,
+        });
+        return siguientes;
+      });
+    },
+    [],
+  );
+
+  const updateAgendaItem = useCallback(
+    (itemId: string, cambios: Partial<Pick<AgendaItem, 'hora' | 'recordatorio' | 'minutosAntes'>>) => {
+      setHorarios(prev => actualizarItem(prev, itemId, cambios));
+    },
+    [],
+  );
+
+  const removeAgendaItem = useCallback((itemId: string) => {
+    setHorarios(prev => eliminarItem(prev, itemId));
+    toast({ title: 'Eliminado de la agenda', description: 'La actividad se quitó de ese momento.' });
+  }, []);
+
+  const removeCell = useCallback((horarioId: string) => {
+    setHorarios(prev => eliminarCelda(prev, horarioId));
+  }, []);
+
+  const moveAgendaItem = useCallback((itemId: string, direction: 'up' | 'down') => {
+    setHorarios(prev => moverItem(prev, itemId, direction));
+  }, []);
+
+  const rescheduleAgendaItem = useCallback((itemId: string, dia: string, franja: string) => {
+    setHorarios(prev => {
+      const resultado = moverItemACelda(prev, itemId, dia, franja);
+      if (!resultado.ok) {
+        avisoLimite(resultado.motivo);
+        return prev;
+      }
+      return resultado.horarios;
     });
-  };
+    toast({ title: 'Actividad movida', description: 'Se cambió de día u horario.' });
+  }, []);
+
+  const copyAgendaItem = useCallback((itemId: string, dias: string[], franjas?: string[]) => {
+    setHorarios(prev => {
+      const { horarios: siguientes, copiados, omitidos } = copiarItemADias(prev, itemId, dias, franjas);
+      if (copiados === 0) {
+        avisoLimite(omitidos > 0 ? 'limite' : undefined);
+        return prev;
+      }
+      toast({
+        title: '📋 Copiada',
+        description:
+          omitidos > 0
+            ? `Copiada ${copiados} vez/veces. ${omitidos} no cupieron.`
+            : `Copiada ${copiados} vez/veces con su hora y su aviso.`,
+      });
+      return siguientes;
+    });
+  }, []);
+
+  const findAgendaItem = useCallback((itemId: string) => buscarItem(horarios, itemId), [horarios]);
 
   const resetToDefault = () => {
     setHorarios([]);
-    localStorage.setItem(STORAGE_KEYS.HORARIOS, JSON.stringify([]));
     toast({
-      title: "Agenda limpiada",
-      description: "Se ha vaciado la agenda semanal. Tus prácticas se mantienen intactas."
+      title: 'Agenda limpiada',
+      description: 'Se ha vaciado la agenda semanal. Tus prácticas se mantienen intactas.',
     });
   };
 
   const exportData = () => {
-    const data = {
-      practicas,
-      horarios,
-      exportDate: new Date().toISOString()
-    };
+    const data = construirExportacion(practicas, horarios);
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -178,119 +217,29 @@ export const useMatrizData = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    toast({
-      title: "Datos exportados",
-      description: "El archivo se ha descargado correctamente."
-    });
+    toast({ title: 'Datos exportados', description: 'El archivo se ha descargado correctamente.' });
   };
 
   const importData = (file: File) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = e => {
       try {
-        const data = JSON.parse(e.target?.result as string);
-        if (data.practicas && Array.isArray(data.practicas)) {
-          setPracticas(data.practicas);
-        }
-        if (data.horarios && Array.isArray(data.horarios)) {
-          setHorarios(data.horarios);
-        }
+        const { practicas: nuevasPracticas, horarios: nuevosHorarios } = leerImportacion(
+          JSON.parse(e.target?.result as string),
+        );
+        if (!nuevasPracticas && !nuevosHorarios) throw new Error('formato');
+        if (nuevasPracticas) setPracticas(nuevasPracticas);
+        if (nuevosHorarios) setHorarios(nuevosHorarios);
+        toast({ title: 'Datos importados', description: 'Los datos se han importado correctamente.' });
+      } catch {
         toast({
-          title: "Datos importados",
-          description: "Los datos se han importado correctamente."
-        });
-      } catch (error) {
-        toast({
-          title: "Error al importar",
-          description: "El archivo no tiene el formato correcto.",
-          variant: "destructive"
+          title: 'Error al importar',
+          description: 'El archivo no tiene el formato correcto.',
+          variant: 'destructive',
         });
       }
     };
     reader.readAsText(file);
-  };
-
-  const moveActivityInSchedule = (horarioId: string, practicaId: string, direction: 'up' | 'down') => {
-    setHorarios(prev => prev.map(h => {
-      if (h.id === horarioId) {
-        const currentIndex = h.practicaIds.indexOf(practicaId);
-        if (currentIndex === -1) return h;
-        
-        const newPracticaIds = [...h.practicaIds];
-        const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-        
-        if (targetIndex >= 0 && targetIndex < newPracticaIds.length) {
-          [newPracticaIds[currentIndex], newPracticaIds[targetIndex]] = 
-          [newPracticaIds[targetIndex], newPracticaIds[currentIndex]];
-        }
-        
-        return { ...h, practicaIds: newPracticaIds };
-      }
-      return h;
-    }));
-  };
-
-  const reschedulePractica = (oldHorarioId: string, practicaId: string, newDia: string, newFranja: string) => {
-    // Remove from old schedule
-    const oldHorario = horarios.find(h => h.id === oldHorarioId);
-    if (!oldHorario) return;
-
-    const updatedOldPracticaIds = oldHorario.practicaIds.filter(id => id !== practicaId);
-    
-    // Check if new slot already exists
-    const existingNewHorario = horarios.find(h => h.dia === newDia && h.franja === newFranja);
-    
-    if (existingNewHorario) {
-      // Verify limit
-      if (existingNewHorario.practicaIds.length >= 3) {
-        toast({
-          title: "¡Límite alcanzado!",
-          description: "El nuevo horario ya tiene 3 actividades.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Add to existing slot
-      setHorarios(prev => prev.map(h => {
-        if (h.id === oldHorarioId) {
-          return updatedOldPracticaIds.length > 0 
-            ? { ...h, practicaIds: updatedOldPracticaIds }
-            : null;
-        }
-        if (h.id === existingNewHorario.id) {
-          return { ...h, practicaIds: [...h.practicaIds, practicaId] };
-        }
-        return h;
-      }).filter(Boolean) as HorarioEntry[]);
-    } else {
-      // Create new slot
-      const newEntry: HorarioEntry = {
-        id: `horario-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        practicaIds: [practicaId],
-        dia: newDia,
-        franja: newFranja
-      };
-      
-      setHorarios(prev => {
-        const filtered = prev.map(h => {
-          if (h.id === oldHorarioId) {
-            return updatedOldPracticaIds.length > 0 
-              ? { ...h, practicaIds: updatedOldPracticaIds }
-              : null;
-          }
-          return h;
-        }).filter(Boolean) as HorarioEntry[];
-        
-        return [...filtered, newEntry];
-      });
-    }
-
-    const practica = practicas.find(p => p.id === practicaId);
-    toast({
-      title: "Práctica reprogramada",
-      description: `"${practica?.titulo}" movido a ${newDia} en la ${newFranja}.`
-    });
   };
 
   return {
@@ -300,11 +249,16 @@ export const useMatrizData = () => {
     updatePractica,
     deletePractica,
     addToSchedule,
-    removeFromSchedule,
-    moveActivityInSchedule,
-    reschedulePractica,
+    addToMultipleSchedules,
+    updateAgendaItem,
+    removeAgendaItem,
+    removeCell,
+    moveAgendaItem,
+    rescheduleAgendaItem,
+    copyAgendaItem,
+    findAgendaItem,
     resetToDefault,
     exportData,
-    importData
+    importData,
   };
 };
