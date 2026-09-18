@@ -12,6 +12,9 @@ import { modulosConfig } from '@/data/matrizData';
 import { Search } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { AgendaTimeFields } from '@/components/AgendaTimeFields';
+import { MINUTOS_ANTES_DEFECTO } from '@/lib/agenda';
+import { OpcionesHorario } from '@/components/ScheduleDialog';
 
 interface QuickAddDialogProps {
   open: boolean;
@@ -19,7 +22,7 @@ interface QuickAddDialogProps {
   dia: string;
   franja: string;
   practicas: Practica[];
-  onAddToSchedule: (practicaId: string, dia: string, franja: string) => void;
+  onAddToSchedule: (practicaId: string, dia: string, franja: string, opciones: OpcionesHorario) => void;
 }
 
 export const QuickAddDialog = ({
@@ -28,23 +31,34 @@ export const QuickAddDialog = ({
   dia,
   franja,
   practicas,
-  onAddToSchedule
+  onAddToSchedule,
 }: QuickAddDialogProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedModule, setSelectedModule] = useState<string | null>(null);
+  const [hora, setHora] = useState('');
+  const [recordatorio, setRecordatorio] = useState(false);
+  const [minutosAntes, setMinutosAntes] = useState(MINUTOS_ANTES_DEFECTO);
 
   const filteredPracticas = practicas.filter(p => {
-    const matchesSearch = p.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         p.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      p.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesModule = !selectedModule || p.modulo === selectedModule;
     return matchesSearch && matchesModule;
   });
 
   const handleAdd = (practicaId: string) => {
-    onAddToSchedule(practicaId, dia, franja);
+    onAddToSchedule(practicaId, dia, franja, {
+      hora: hora || null,
+      recordatorio: recordatorio && !!hora,
+      minutosAntes,
+    });
     onOpenChange(false);
     setSearchTerm('');
     setSelectedModule(null);
+    setHora('');
+    setRecordatorio(false);
+    setMinutosAntes(MINUTOS_ANTES_DEFECTO);
   };
 
   const diasLabels = {
@@ -54,19 +68,19 @@ export const QuickAddDialog = ({
     jueves: 'Jueves',
     viernes: 'Viernes',
     sabado: 'Sábado',
-    domingo: 'Domingo'
+    domingo: 'Domingo',
   };
 
   const franjasLabels = {
     mañana: '🌅 Mañana',
-    'media-mañana': '☀️ Media Mañana',  
+    'media-mañana': '☀️ Media Mañana',
     tarde: '🌞 Tarde',
-    noche: '🌙 Noche'
+    noche: '🌙 Noche',
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh]">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-base sm:text-lg">
             Añadir práctica a {diasLabels[dia as keyof typeof diasLabels]} - {franjasLabels[franja as keyof typeof franjasLabels]}
@@ -74,13 +88,26 @@ export const QuickAddDialog = ({
         </DialogHeader>
 
         <div className="space-y-4">
+          <AgendaTimeFields
+            idPrefijo="rapido"
+            hora={hora}
+            onHoraChange={valor => {
+              setHora(valor);
+              if (!valor) setRecordatorio(false);
+            }}
+            recordatorio={recordatorio}
+            onRecordatorioChange={setRecordatorio}
+            minutosAntes={minutosAntes}
+            onMinutosAntesChange={setMinutosAntes}
+          />
+
           {/* Search bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar prácticas..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="pl-10"
             />
           </div>
@@ -88,7 +115,7 @@ export const QuickAddDialog = ({
           {/* Module filters */}
           <div className="flex flex-wrap gap-2">
             <Button
-              variant={selectedModule === null ? "default" : "outline"}
+              variant={selectedModule === null ? 'default' : 'outline'}
               size="sm"
               onClick={() => setSelectedModule(null)}
               className="min-h-[36px]"
@@ -98,7 +125,7 @@ export const QuickAddDialog = ({
             {modulosConfig.map(modulo => (
               <Button
                 key={modulo.id}
-                variant={selectedModule === modulo.id ? "default" : "outline"}
+                variant={selectedModule === modulo.id ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setSelectedModule(modulo.id)}
                 className="min-h-[36px]"
@@ -109,7 +136,7 @@ export const QuickAddDialog = ({
           </div>
 
           {/* Practices list */}
-          <ScrollArea className="h-[300px] sm:h-[400px]">
+          <ScrollArea className="h-[260px] sm:h-[340px]">
             <div className="space-y-2 pr-4">
               {filteredPracticas.map(practica => {
                 const modulo = modulosConfig.find(m => m.id === practica.modulo);
@@ -121,9 +148,7 @@ export const QuickAddDialog = ({
                     <div className="flex-1 min-w-0 mr-3">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-lg sm:text-xl">{practica.icono}</span>
-                        <h4 className="font-semibold text-sm sm:text-base truncate">
-                          {practica.titulo}
-                        </h4>
+                        <h4 className="font-semibold text-sm sm:text-base truncate">{practica.titulo}</h4>
                       </div>
                       <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 mb-2">
                         {practica.descripcion}
@@ -140,17 +165,13 @@ export const QuickAddDialog = ({
                         </Badge>
                       </div>
                     </div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAdd(practica.id)}
-                      className="min-h-[36px] shrink-0"
-                    >
+                    <Button size="sm" onClick={() => handleAdd(practica.id)} className="min-h-[36px] shrink-0">
                       Añadir
                     </Button>
                   </div>
                 );
               })}
-              
+
               {filteredPracticas.length === 0 && (
                 <div className="text-center py-8 text-muted-foreground">
                   <p className="text-sm">No se encontraron prácticas</p>

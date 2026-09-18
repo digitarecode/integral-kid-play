@@ -19,13 +19,26 @@ import { Practica } from '@/types/matriz';
 import { diasSemana, franjasHorarias } from '@/data/matrizData';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { AgendaTimeFields } from '@/components/AgendaTimeFields';
+import { MINUTOS_ANTES_DEFECTO } from '@/lib/agenda';
+
+export interface OpcionesHorario {
+  hora: string | null;
+  recordatorio: boolean;
+  minutosAntes: number;
+}
 
 interface ScheduleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   practica: Practica | null;
-  onAddToSchedule: (practicaId: string, dia: string, franja: string) => void;
-  onAddToMultipleSchedules?: (practicaId: string, dias: string[], franjas: string[]) => void;
+  onAddToSchedule: (practicaId: string, dia: string, franja: string, opciones: OpcionesHorario) => void;
+  onAddToMultipleSchedules?: (
+    practicaId: string,
+    dias: string[],
+    franjas: string[],
+    opciones: OpcionesHorario,
+  ) => void;
 }
 
 export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, onAddToMultipleSchedules }: ScheduleDialogProps) => {
@@ -35,21 +48,29 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
   const [selectedDias, setSelectedDias] = useState<string[]>([]);
   const [selectedFranjas, setSelectedFranjas] = useState<string[]>([]);
   const [multiDayPreset, setMultiDayPreset] = useState<string>('custom');
+  const [hora, setHora] = useState('');
+  const [recordatorio, setRecordatorio] = useState(false);
+  const [minutosAntes, setMinutosAntes] = useState(MINUTOS_ANTES_DEFECTO);
+
+  const opciones = (): OpcionesHorario => ({
+    hora: hora || null,
+    recordatorio: recordatorio && !!hora,
+    minutosAntes,
+  });
 
   const handleAdd = () => {
     if (!practica) return;
 
     if (scheduleMode === 'single' && selectedDia && selectedFranja) {
-      onAddToSchedule(practica.id, selectedDia, selectedFranja);
+      onAddToSchedule(practica.id, selectedDia, selectedFranja, opciones());
       resetAndClose();
     } else if (scheduleMode === 'multiple' && selectedDias.length > 0 && selectedFranjas.length > 0) {
       if (onAddToMultipleSchedules) {
-        onAddToMultipleSchedules(practica.id, selectedDias, selectedFranjas);
+        onAddToMultipleSchedules(practica.id, selectedDias, selectedFranjas, opciones());
       } else {
-        // Fallback: add individually
         selectedDias.forEach(dia => {
           selectedFranjas.forEach(franja => {
-            onAddToSchedule(practica.id, dia, franja);
+            onAddToSchedule(practica.id, dia, franja, opciones());
           });
         });
       }
@@ -65,6 +86,9 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
     setSelectedFranjas([]);
     setScheduleMode('single');
     setMultiDayPreset('custom');
+    setHora('');
+    setRecordatorio(false);
+    setMinutosAntes(MINUTOS_ANTES_DEFECTO);
   };
 
   const handlePresetChange = (preset: string) => {
@@ -79,22 +103,18 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
   };
 
   const toggleDia = (dia: string) => {
-    setSelectedDias(prev => 
-      prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]
-    );
+    setSelectedDias(prev => (prev.includes(dia) ? prev.filter(d => d !== dia) : [...prev, dia]));
   };
 
   const toggleFranja = (franja: string) => {
-    setSelectedFranjas(prev => 
-      prev.includes(franja) ? prev.filter(f => f !== franja) : [...prev, franja]
-    );
+    setSelectedFranjas(prev => (prev.includes(franja) ? prev.filter(f => f !== franja) : [...prev, franja]));
   };
 
   const franjasLabels = {
     mañana: '🌅 Mañana',
-    'media-mañana': '☀️ Media Mañana',  
+    'media-mañana': '☀️ Media Mañana',
     tarde: '🌞 Tarde',
-    noche: '🌙 Noche'
+    noche: '🌙 Noche',
   };
 
   const diasLabels = {
@@ -104,7 +124,7 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
     jueves: 'Jueves',
     viernes: 'Viernes',
     sabado: 'Sábado',
-    domingo: 'Domingo'
+    domingo: 'Domingo',
   };
 
   return (
@@ -113,7 +133,7 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
         <DialogHeader>
           <DialogTitle className="text-base sm:text-lg">Añadir al Horario</DialogTitle>
         </DialogHeader>
-        
+
         {practica && (
           <div className="space-y-4">
             <div className="p-3 sm:p-4 bg-muted rounded-lg">
@@ -161,7 +181,7 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="franja" className="text-sm">Momento del día</Label>
                   <Select value={selectedFranja} onValueChange={setSelectedFranja}>
@@ -205,10 +225,7 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
                           checked={selectedDias.includes(dia)}
                           onCheckedChange={() => toggleDia(dia)}
                         />
-                        <Label
-                          htmlFor={`dia-${dia}`}
-                          className="text-xs sm:text-sm font-normal cursor-pointer"
-                        >
+                        <Label htmlFor={`dia-${dia}`} className="text-xs sm:text-sm font-normal cursor-pointer">
                           {diasLabels[dia as keyof typeof diasLabels]}
                         </Label>
                       </div>
@@ -227,10 +244,7 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
                           checked={selectedFranjas.includes(franja)}
                           onCheckedChange={() => toggleFranja(franja)}
                         />
-                        <Label
-                          htmlFor={`franja-${franja}`}
-                          className="text-xs sm:text-sm font-normal cursor-pointer"
-                        >
+                        <Label htmlFor={`franja-${franja}`} className="text-xs sm:text-sm font-normal cursor-pointer">
                           {franjasLabels[franja as keyof typeof franjasLabels]}
                         </Label>
                       </div>
@@ -248,17 +262,30 @@ export const ScheduleDialog = ({ open, onOpenChange, practica, onAddToSchedule, 
                 )}
               </>
             )}
+
+            <AgendaTimeFields
+              idPrefijo="nuevo"
+              hora={hora}
+              onHoraChange={valor => {
+                setHora(valor);
+                if (!valor) setRecordatorio(false);
+              }}
+              recordatorio={recordatorio}
+              onRecordatorioChange={setRecordatorio}
+              minutosAntes={minutosAntes}
+              onMinutosAntesChange={setMinutosAntes}
+            />
           </div>
         )}
-        
+
         <DialogFooter className="flex-col sm:flex-row gap-2">
           <Button variant="outline" onClick={resetAndClose} className="w-full sm:w-auto">
             Cancelar
           </Button>
-          <Button 
+          <Button
             onClick={handleAdd}
             disabled={
-              scheduleMode === 'single' 
+              scheduleMode === 'single'
                 ? !selectedDia || !selectedFranja
                 : selectedDias.length === 0 || selectedFranjas.length === 0
             }
